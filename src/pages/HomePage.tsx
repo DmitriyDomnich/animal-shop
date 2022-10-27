@@ -1,12 +1,16 @@
 import React from 'react';
-import { useAppAuth } from 'hooks/useAppAuth';
+import SearchBar from 'components/SearchBar';
+import AnimalCategories from 'components/AnimalCategories/index';
+import Advertisements from 'components/Advertisements';
 
 const HomePage = () => {
-  const [user] = useAppAuth();
+  // const { dictionary } = useAppSelector(selectAppLocale);
 
   return (
-    <div>
-      Hello, <span className='text-amber-400'>{user?.displayName}</span>
+    <div className='w-full md:w-4/5 mx-auto'>
+      <SearchBar />
+      <AnimalCategories />
+      <Advertisements />
     </div>
   );
 };

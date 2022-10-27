@@ -1,7 +1,9 @@
 import { allLocales } from 'locales/allLocales';
 import { Languages, LanguageDictionary } from 'locales/models';
+import moment from 'moment';
 import { ActionType, getType } from 'typesafe-actions';
 import * as Actions from './actions';
+import 'moment/locale/uk';
 
 export type Theme = 'dark' | 'light';
 export type AppActions = ActionType<typeof Actions>;
@@ -19,6 +21,9 @@ const prefferedLanguage =
   (navigator.language.slice(0, 2) as Languages);
 let theme = localStorage.getItem('theme') as Theme | null;
 
+if (!localStorage.getItem('locale')) {
+  localStorage.setItem('locale', prefferedLanguage);
+}
 if (!theme) {
   const currentHours = new Date().getHours();
   theme = currentHours > 8 && currentHours < 16 ? 'light' : 'dark';
@@ -39,11 +44,14 @@ export const appReducer = (
 ): AppState => {
   switch (action.type) {
     case getType(Actions.setLocale): {
+      const locale = action.payload;
+      localStorage.setItem('locale', locale);
+      moment.locale(locale === 'ua' ? 'uk' : locale);
       return {
         ...state,
         locale: {
-          name: action.payload,
-          dictionary: allLocales[action.payload],
+          name: locale,
+          dictionary: allLocales[locale],
         },
       };
     }
