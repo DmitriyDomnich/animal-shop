@@ -1,125 +1,58 @@
-import { AdvertisementModel } from 'models/Advertisiment';
-import React, { useMemo } from 'react';
-import { Card, CardContent, CardMedia, Button } from '@mui/material';
+import { AdvertisementModel } from 'models/AdvertisimentModel';
+import React, { useCallback, useMemo } from 'react';
+import { Card, CardContent, CardMedia } from '@mui/material';
 import { useAppSelector } from 'rdx/hooks';
 import { selectAppLocale } from 'rdx/app/selectors';
-import { Timestamp } from 'firebase/firestore';
 import moment from 'moment';
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-// import FavoriteIcon from '@mui/icons-material/Favorite';
+import { useNavigate } from 'react-router-dom';
 
 type Props = {
   advertisement: AdvertisementModel;
+  children?: JSX.Element;
 };
 
-const AdvertisementCard = ({ advertisement }: Props) => {
+const AdvertisementCard = ({ advertisement, children }: Props) => {
   const { dictionary } = useAppSelector(selectAppLocale);
+  const navigate = useNavigate();
   const createdAt = useMemo(() => {
     const { date } = advertisement;
-    return moment(
-      new Timestamp(date.seconds, date.nanoseconds).toDate()
-    ).format('lll');
+    console.log(date);
+
+    return moment(date).format('lll');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [advertisement, dictionary]);
 
+  const goToAdv = useCallback(() => {
+    navigate(`/adv?advId=${advertisement.id}`);
+  }, [navigate, advertisement.id]);
+
   return (
     <>
-      <div className='cursor-pointer p-1 flex-grow sm:flex-grow-0 sm:basis-1/2 md:basis-1/3 lg:basis-1/4'>
+      <div
+        onClick={goToAdv}
+        className='cursor-pointer p-1 flex-grow sm:flex-grow-0 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 max-w-[366px] transition-transform hover:-translate-y-2'
+      >
         <Card>
           <CardMedia
             component='img'
-            height='140'
-            image={advertisement.pictures[0]}
+            height={140}
+            image={advertisement.pictures[0]!.url}
           />
-          <CardContent className='relative'>
+          <CardContent>
             <h2 className='font-bold text-xl line-clamp-2 cursor-text'>
-              {advertisement.description}
+              {advertisement.name}
             </h2>
             <h4 className='text-sm my-6'>
-              {advertisement.place} - {createdAt}
+              {dictionary.places[advertisement.place]} {dictionary.region} -{' '}
+              {createdAt}
             </h4>
             <h2 className='font-bold text-lg flex justify-between'>
               <span>
-                {advertisement.price} {dictionary.hryvnia}
+                {advertisement.price
+                  ? `${advertisement.price} ${dictionary.hryvnia}`
+                  : dictionary.free}
               </span>
-              <Button size='small'>
-                <FavoriteBorderIcon />
-              </Button>
-            </h2>
-          </CardContent>
-        </Card>
-      </div>
-      <div className='cursor-pointer p-1 flex-grow sm:flex-grow-0 sm:basis-1/2 md:basis-1/3 lg:basis-1/4'>
-        <Card>
-          <CardMedia
-            component='img'
-            height='140'
-            image={advertisement.pictures[0]}
-          />
-          <CardContent className='relative'>
-            <h2 className='font-bold text-xl line-clamp-2 cursor-text'>
-              {advertisement.description}
-            </h2>
-            <h4 className='text-sm my-6'>
-              {advertisement.place} - {createdAt}
-            </h4>
-            <h2 className='font-bold text-lg flex justify-between'>
-              <span>
-                {advertisement.price} {dictionary.hryvnia}
-              </span>
-              <Button size='small'>
-                <FavoriteBorderIcon />
-              </Button>
-            </h2>
-          </CardContent>
-        </Card>
-      </div>
-      <div className='cursor-pointer p-1 flex-grow sm:flex-grow-0 sm:basis-1/2 md:basis-1/3 lg:basis-1/4'>
-        <Card>
-          <CardMedia
-            component='img'
-            height='140'
-            image={advertisement.pictures[0]}
-          />
-          <CardContent className='relative'>
-            <h2 className='font-bold text-xl line-clamp-2 cursor-text'>
-              {advertisement.description}
-            </h2>
-            <h4 className='text-sm my-6'>
-              {advertisement.place} - {createdAt}
-            </h4>
-            <h2 className='font-bold text-lg flex justify-between'>
-              <span>
-                {advertisement.price} {dictionary.hryvnia}
-              </span>
-              <Button size='small'>
-                <FavoriteBorderIcon />
-              </Button>
-            </h2>
-          </CardContent>
-        </Card>
-      </div>
-      <div className='cursor-pointer p-1 flex-grow sm:flex-grow-0 sm:basis-1/2 md:basis-1/3 lg:basis-1/4'>
-        <Card>
-          <CardMedia
-            component='img'
-            height='140'
-            image={advertisement.pictures[0]}
-          />
-          <CardContent className='relative'>
-            <h2 className='font-bold text-xl line-clamp-2 cursor-text'>
-              {advertisement.description}
-            </h2>
-            <h4 className='text-sm my-6'>
-              {advertisement.place} - {createdAt}
-            </h4>
-            <h2 className='font-bold text-lg flex justify-between'>
-              <span>
-                {advertisement.price} {dictionary.hryvnia}
-              </span>
-              <Button size='small'>
-                <FavoriteBorderIcon />
-              </Button>
+              <div className='flex space-x-2'>{children}</div>
             </h2>
           </CardContent>
         </Card>

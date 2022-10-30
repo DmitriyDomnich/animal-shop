@@ -1,42 +1,14 @@
 import React from 'react';
 import { selectAppLocale } from 'rdx/app/selectors';
 import { useAppSelector } from 'rdx/hooks';
-import {
-  DocumentData,
-  FirestoreDataConverter,
-  orderBy,
-  QueryDocumentSnapshot,
-  SnapshotOptions,
-  WithFieldValue,
-} from 'firebase/firestore';
-import { useAppCollectionDataOnce } from 'hooks/useAppCollectionDataOnce';
 import { AnimalTypeModel } from 'models/AnimalTypeModel';
 import AnimalCaterogyCard from './AnimalCaterogyCard';
-
-const postConverter: FirestoreDataConverter<AnimalTypeModel> = {
-  toFirestore(animalType: WithFieldValue<AnimalTypeModel>): DocumentData {
-    return { name: animalType.name, imgURL: animalType.imgURL };
-  },
-  fromFirestore(
-    snapshot: QueryDocumentSnapshot,
-    options: SnapshotOptions
-  ): AnimalTypeModel {
-    const data = snapshot.data(options);
-    return {
-      imgURL: data.imgURL,
-      name: data.name,
-      id: snapshot.id,
-    };
-  },
-};
+import { useAnimalTypes } from 'hooks/useAnimalTypes';
+import { useCollectionDataOnce } from 'react-firebase-hooks/firestore';
 
 const AnimalCategories = () => {
   const { dictionary } = useAppSelector(selectAppLocale);
-  const [animalTypes] = useAppCollectionDataOnce<AnimalTypeModel>(
-    'animal-types',
-    postConverter,
-    [orderBy('name')]
-  );
+  const [animalTypes] = useAnimalTypes();
 
   return (
     <div className='my-16'>

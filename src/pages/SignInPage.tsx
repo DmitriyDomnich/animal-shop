@@ -4,15 +4,17 @@ import { AuthContext } from 'App';
 import { useSignInWithGoogle } from 'react-firebase-hooks/auth';
 import { useAppSelector } from 'rdx/hooks';
 import { selectAppLocale } from 'rdx/app/selectors';
+import { useNavigate } from 'react-router-dom';
 
 const SignInPage = () => {
   const auth = useContext(AuthContext);
   const [signInWithGoogle] = useSignInWithGoogle(auth);
   const { dictionary } = useAppSelector(selectAppLocale);
+  const navigate = useNavigate();
 
   const onSignInWithGoogle = useCallback(() => {
-    signInWithGoogle();
-  }, [signInWithGoogle]);
+    signInWithGoogle().then((_) => navigate('/'));
+  }, [signInWithGoogle, navigate]);
 
   return (
     <div>

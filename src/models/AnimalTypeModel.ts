@@ -1,7 +1,7 @@
-import { AnimalTypes } from 'locales/models';
+import { AnimalType } from 'locales/models';
 
 export interface AnimalTypeModel {
-  name: AnimalTypes;
+  name: AnimalType;
   imgURL: string;
   id: string;
 }

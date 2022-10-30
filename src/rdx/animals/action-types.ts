@@ -1,0 +1,1 @@
+export const SET_ANIMAL_TYPES = 'SET_ANIMAL_TYPES';

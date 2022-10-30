@@ -12,12 +12,36 @@ export interface LanguageDictionary {
   regions: string[];
   filterByRegion: string;
   animalCategories: string;
-  animalTypes: Record<AnimalTypes, string>;
+  AnimalType: Record<AnimalType, string>;
   advertisementsHomePageText: string;
   hryvnia: string;
+  places: Record<Places, string>;
+  region: string;
+  createAdvertisement: string;
+  updateAdvertisement: string;
+  describeInDetail: string;
+  enterName: string;
+  category: string;
+  photo: string;
+  photoText: string;
+  description: string;
+  writeMore: string;
+  symbols: [string, string];
+  location: string;
+  contactDetails: string;
+  yourName: string;
+  email: string;
+  phoneNumber: string;
+  post: string;
+  price: string;
+  update: string;
+  delete: string;
+  free: string;
+  yourAdvertisements: string;
+  noUserAdvs: string;
 }
-
-export type AnimalTypes =
+export type Places = 'KHR' | 'KY' | 'LV' | 'CHT' | 'CHN' | 'OD' | 'KHE';
+export type AnimalType =
   | 'Dog'
   | 'Cat'
   | 'Other'

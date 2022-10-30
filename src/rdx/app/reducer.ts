@@ -19,11 +19,12 @@ export interface AppState {
 const prefferedLanguage =
   (localStorage.getItem('locale') as Languages) ||
   (navigator.language.slice(0, 2) as Languages);
-let theme = localStorage.getItem('theme') as Theme | null;
-
+moment.locale(prefferedLanguage === 'ua' ? 'uk' : prefferedLanguage);
 if (!localStorage.getItem('locale')) {
   localStorage.setItem('locale', prefferedLanguage);
 }
+
+let theme = localStorage.getItem('theme') as Theme | null;
 if (!theme) {
   const currentHours = new Date().getHours();
   theme = currentHours > 8 && currentHours < 16 ? 'light' : 'dark';

@@ -10,11 +10,13 @@ import { selectAppLocale, selectAppTheme } from 'rdx/app/selectors';
 import { useAppDispatch, useAppSelector } from 'rdx/hooks';
 import ThemeSwitch from './ThemeSwitch';
 import FavoriteIcon from '@mui/icons-material/Favorite';
+import HomeIcon from '@mui/icons-material/Home';
 import { Languages } from 'locales/models';
 import { Avatar, Button, Menu, MenuItem, Tooltip } from '@mui/material';
 import { useAppAuth } from 'hooks/useAppAuth';
 import { signOut } from 'firebase/auth';
 import { AuthContext, ColorModeContext } from 'App';
+import { useNavigate } from 'react-router-dom';
 
 type AvatarConfig = {
   alt: string;
@@ -35,6 +37,7 @@ const Topbar = () => {
   const userAvatarRef = useRef(null);
   const [userOptionsOpen, setUserOptionsOpen] = useState(false);
   const colorMode = React.useContext(ColorModeContext);
+  const navigate = useNavigate();
 
   const avatar = useMemo(() => {
     if (!user) {
@@ -60,6 +63,11 @@ const Topbar = () => {
     return avatarConfig;
   }, [user]);
 
+  const onAddAdvertisementClick = useCallback(
+    () => navigate('/post'),
+    [navigate]
+  );
+  const onHomeClick = useCallback(() => navigate('/'), [navigate]);
   const onThemeChange = useCallback(
     (ev: React.ChangeEvent<HTMLInputElement>) => {
       colorMode.toggleColorMode();
@@ -86,17 +94,23 @@ const Topbar = () => {
   );
 
   const auth = useContext(AuthContext);
-  const onSignOut = useCallback(
+  const handleSignOut = useCallback(
     () => signOut(auth).then((_) => setUserOptionsOpen(false)),
     [auth]
   );
+  const goToYourAdvertisements = useCallback(() => {
+    setUserOptionsOpen(false);
+    navigate('/my-advs');
+  }, [navigate, setUserOptionsOpen]);
 
   return (
-    <nav className='w-full md:w-4/5 mx-auto drop-shadow-xl sticky top-0 px-2 py-1 bg-slate-200 dark:bg-slate-700 h-16 flex items-center justify-between'>
+    <nav className='container z-10 mx-auto drop-shadow-xl sticky top-0 px-2 py-1 bg-slate-200 dark:bg-slate-700 h-16 flex items-center justify-between'>
       <div>
         {user && (
           <div className='flex space-x-2 items-center'>
-            <Button variant='contained'>{dictionary.addAdvertisement}</Button>
+            <Button variant='contained' onClick={onAddAdvertisementClick}>
+              {dictionary.addAdvertisement}
+            </Button>
             <Tooltip title={dictionary.userOptions}>
               <div ref={userAvatarRef}>
                 <Avatar
@@ -111,15 +125,19 @@ const Topbar = () => {
               open={userOptionsOpen}
               onClose={onUserOptionsClose}
             >
-              <MenuItem onClick={onUserOptionsClose}>Profile</MenuItem>
-              <MenuItem onClick={onUserOptionsClose}>My account</MenuItem>
-              <MenuItem onClick={onSignOut}>{dictionary.signOut}</MenuItem>
+              <MenuItem onClick={goToYourAdvertisements}>
+                {dictionary.yourAdvertisements}
+              </MenuItem>
+              <MenuItem onClick={handleSignOut}>{dictionary.signOut}</MenuItem>
             </Menu>
           </div>
         )}
       </div>
       <div className='flex items-center'>
         <div className='space-x-2'>
+          <Button onClick={onHomeClick}>
+            <HomeIcon />
+          </Button>
           <Button color='secondary'>
             <FavoriteIcon />
           </Button>

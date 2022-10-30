@@ -13,10 +13,10 @@ const AnimalCaterogyCard = ({ animalType }: Props) => {
   const { dictionary } = useAppSelector(selectAppLocale);
 
   return (
-    <div className='flex hover:underline group cursor-pointer flex-col first:ml-4 first:mt-3 space-y-3 h-auto basis-36'>
+    <div className='flex hover:underline group cursor-pointer flex-col first:ml-4 first:mt-3 space-y-3 h-auto basis-44'>
       <div
         style={{ backgroundColor: color }}
-        className='rounded-full group-hover:shadow-xl transition-shadow overflow-hidden h-36 flex items-center justify-center'
+        className='rounded-full group-hover:shadow-xl transition-shadow overflow-hidden h-44 flex items-center justify-center'
       >
         <div
           className='bg-cover rounded-full bg-center w-4/5 h-4/5 bg-no-repeat'
@@ -24,7 +24,7 @@ const AnimalCaterogyCard = ({ animalType }: Props) => {
         ></div>
       </div>
       <h4 className='self-center text-2xl text-gray-800 dark:text-gray-200'>
-        {dictionary.animalTypes[animalType.name]}
+        {dictionary.AnimalType[animalType.name]}
       </h4>
     </div>
   );

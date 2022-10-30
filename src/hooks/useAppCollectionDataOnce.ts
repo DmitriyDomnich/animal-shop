@@ -1,28 +1,46 @@
 import {
   collection,
+  DocumentData,
   FirestoreDataConverter,
+  FirestoreError,
   getFirestore,
   query,
   QueryConstraint,
+  QuerySnapshot,
 } from 'firebase/firestore';
 import { useMemo } from 'react';
 import { useCollectionDataOnce } from 'react-firebase-hooks/firestore';
 import { app } from 'services/fire';
 
 export const useAppCollectionDataOnce = <T extends object>(
-  path: string,
-  converter: null | FirestoreDataConverter<T> = null,
-  queryConstraints?: QueryConstraint[]
-) => {
-  const collectionQuery = useMemo(
-    () =>
-      query(collection(getFirestore(app), path), ...(queryConstraints || [])),
-    [path, queryConstraints]
-  );
+  options: {
+    path: string;
+    converter: null | FirestoreDataConverter<T>;
+    queryConstraints?: QueryConstraint[];
+  } | null
+): [
+  any[] | undefined,
+  boolean,
+  FirestoreError | undefined,
+  QuerySnapshot<DocumentData> | undefined
+] => {
+  const collectionQuery = useMemo(() => {
+    if (options) {
+      const { converter, path, queryConstraints } = options;
+      let resultQuery = query(
+        collection(getFirestore(app), path),
+        ...(queryConstraints || [])
+      );
+      if (converter) {
+        resultQuery = resultQuery.withConverter(converter);
+      }
+      return resultQuery;
+    }
+    return null;
+  }, [options]);
 
-  const [data, loading, error, snapshot] = useCollectionDataOnce(
-    converter ? collectionQuery.withConverter(converter) : collectionQuery
-  );
+  const [data, loading, error, snapshot] =
+    useCollectionDataOnce(collectionQuery);
 
   return [data, loading, error, snapshot];
 };

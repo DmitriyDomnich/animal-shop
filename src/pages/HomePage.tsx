@@ -7,7 +7,7 @@ const HomePage = () => {
   // const { dictionary } = useAppSelector(selectAppLocale);
 
   return (
-    <div className='w-full md:w-4/5 mx-auto'>
+    <div className='container mx-auto'>
       <SearchBar />
       <AnimalCategories />
       <Advertisements />
