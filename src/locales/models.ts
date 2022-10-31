@@ -39,6 +39,13 @@ export interface LanguageDictionary {
   free: string;
   yourAdvertisements: string;
   noUserAdvs: string;
+  followedAdvertisements: string;
+  noFollowedAdvs: string;
+  of: string;
+  published: string;
+  publisher: string;
+  showPhone: string;
+  message: string;
 }
 export type Places = 'KHR' | 'KY' | 'LV' | 'CHT' | 'CHN' | 'OD' | 'KHE';
 export type AnimalType =

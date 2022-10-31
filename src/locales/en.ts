@@ -58,4 +58,11 @@ export const enLocale: LanguageDictionary = {
   free: 'Free',
   yourAdvertisements: 'Your Advertisements',
   noUserAdvs: "You don't have advertisements",
+  followedAdvertisements: 'Followed Advertisements',
+  noFollowedAdvs: "You don't follow any advertisements",
+  of: 'of',
+  published: 'Published',
+  publisher: 'Publisher',
+  showPhone: 'Show mobile phone',
+  message: 'Message',
 };

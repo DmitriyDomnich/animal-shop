@@ -58,4 +58,11 @@ export const uaLocale: LanguageDictionary = {
   free: 'Безкоштовно',
   yourAdvertisements: 'Ваші оголошення',
   noUserAdvs: 'У вас немає оголошень',
+  followedAdvertisements: 'Вашi відстежені оголошення',
+  noFollowedAdvs: 'Ви не вiдстежуєте нiякi оголошення',
+  of: 'з',
+  published: 'Опубліковано',
+  publisher: 'Видавець',
+  showPhone: 'Показати моб. телефон',
+  message: 'Повідомлення',
 };

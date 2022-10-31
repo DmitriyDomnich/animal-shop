@@ -193,6 +193,7 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
         },
         {} as any
       );
+      advToPost.userImage = user!.photoURL || '';
       advToPost.id = advertisementId;
       if (advertisement) {
         dispatch(updateAdvertisement(advToPost)).then((_) => navigate('/'));
@@ -200,11 +201,9 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
         dispatch(postAdvertisement(advToPost)).then((_) => navigate('/'));
       }
     },
-    [formState, advertisementId, dispatch, advertisement, navigate]
+    [formState, advertisementId, dispatch, advertisement, navigate, user]
   );
   const handleDelete = useCallback(() => {
-    console.log('advId=', advertisementId);
-
     dispatch(deleteAdvertisement(advertisementId)).then((_) => navigate('/'));
   }, [dispatch, advertisementId, navigate]);
 

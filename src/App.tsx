@@ -26,6 +26,9 @@ const CreateAdvertisementPage = lazy(
   () => import('./pages/CreateAdvertisementPage')
 );
 const MyAdvertisementsPage = lazy(() => import('./pages/MyAdvertisementsPage'));
+const FollowedAdvertisementsPage = lazy(
+  () => import('./pages/FollowedAdvertisementsPage')
+);
 
 function App() {
   const [, loading] = useAppAuth();
@@ -91,6 +94,16 @@ function App() {
                   </AuthGuard>
                 }
                 path='/adv'
+              />
+              <Route
+                element={
+                  <AuthGuard>
+                    <Suspense fallback={<div>...loading</div>}>
+                      <FollowedAdvertisementsPage />
+                    </Suspense>
+                  </AuthGuard>
+                }
+                path='/followed'
               />
               <Route
                 element={

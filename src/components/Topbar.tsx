@@ -102,6 +102,9 @@ const Topbar = () => {
     setUserOptionsOpen(false);
     navigate('/my-advs');
   }, [navigate, setUserOptionsOpen]);
+  const goToFollowedAdvertisements = useCallback(() => {
+    navigate('/followed');
+  }, [navigate]);
 
   return (
     <nav className='container z-10 mx-auto drop-shadow-xl sticky top-0 px-2 py-1 bg-slate-200 dark:bg-slate-700 h-16 flex items-center justify-between'>
@@ -138,7 +141,7 @@ const Topbar = () => {
           <Button onClick={onHomeClick}>
             <HomeIcon />
           </Button>
-          <Button color='secondary'>
+          <Button onClick={goToFollowedAdvertisements} color='secondary'>
             <FavoriteIcon />
           </Button>
           <span

@@ -30,7 +30,7 @@ const MyAdvertisementsPage = (props: Props) => {
   return (
     <div className='container mx-auto bg-indigo-300 dark:bg-gray-600 p-3 md:p-5'>
       <h2 className='text-5xl text-center text-sky-900 dark:text-sky-300'>
-        {dictionary.advertisementsHomePageText}
+        {dictionary.yourAdvertisements}
       </h2>
       <div className={`my-4 ${advertisements?.length ? 'flex flex-wrap' : ''}`}>
         {!loading && advertisements?.length ? (

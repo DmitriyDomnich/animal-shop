@@ -65,7 +65,7 @@ export const advertisementsReducer = (
         },
       };
     }
-    // ? postAdvertisementAsyncAction
+    // * postAdvertisementAsyncAction
     case getType(Actions.postAdvertisementAsyncAction.request): {
       return {
         ...state,
@@ -95,7 +95,7 @@ export const advertisementsReducer = (
         },
       };
     }
-    // ? updateAdvertisementAsyncAction
+    // * updateAdvertisementAsyncAction
     case getType(Actions.updateAdvertisementAsyncAction.request): {
       return {
         ...state,
@@ -127,13 +127,13 @@ export const advertisementsReducer = (
         },
       };
     }
-    // ! deleteAdvertisementAsyncAction
+    // * deleteAdvertisementAsyncAction
     case getType(Actions.deleteAdvertisementAsyncAction.request): {
       return {
         ...state,
         userAdvertisements: {
           ...state.userAdvertisements,
-          loading: true,
+          error: null,
         },
       };
     }
@@ -154,6 +154,99 @@ export const advertisementsReducer = (
         ...state,
         userAdvertisements: {
           ...state.userAdvertisements,
+          loading: false,
+          error: action.payload,
+        },
+      };
+    }
+    // ! getUserFollowedAdvertisementsAsyncAction
+    case getType(Actions.getUserFollowedAdvertisementsAsyncAction.request): {
+      return {
+        ...state,
+        followedAdvertisements: {
+          ...state.followedAdvertisements,
+          loading: true,
+          error: null,
+        },
+      };
+    }
+    case getType(Actions.getUserFollowedAdvertisementsAsyncAction.success): {
+      return {
+        ...state,
+        followedAdvertisements: {
+          ...state.followedAdvertisements,
+          loading: false,
+          data: action.payload,
+        },
+      };
+    }
+    case getType(Actions.getUserFollowedAdvertisementsAsyncAction.failure): {
+      return {
+        ...state,
+        followedAdvertisements: {
+          ...state.followedAdvertisements,
+          loading: false,
+          error: action.payload,
+        },
+      };
+    }
+    // ! postUserFollowedAdvertisementsAsyncAction
+    case getType(Actions.postUserFollowedAdvertisementsAsyncAction.request): {
+      return {
+        ...state,
+        followedAdvertisements: {
+          ...state.followedAdvertisements,
+          error: null,
+        },
+      };
+    }
+    case getType(Actions.postUserFollowedAdvertisementsAsyncAction.success): {
+      return {
+        ...state,
+        followedAdvertisements: {
+          ...state.followedAdvertisements,
+          data: state.followedAdvertisements.data.concat(action.payload),
+          loading: false,
+        },
+      };
+    }
+    case getType(Actions.postUserFollowedAdvertisementsAsyncAction.failure): {
+      return {
+        ...state,
+        followedAdvertisements: {
+          ...state.followedAdvertisements,
+          loading: false,
+          error: action.payload,
+        },
+      };
+    }
+    // ! deleteUserFollowedAdvertisementsAsyncAction
+    case getType(Actions.deleteUserFollowedAdvertisementsAsyncAction.request): {
+      return {
+        ...state,
+        followedAdvertisements: {
+          ...state.followedAdvertisements,
+          error: null,
+        },
+      };
+    }
+    case getType(Actions.deleteUserFollowedAdvertisementsAsyncAction.success): {
+      return {
+        ...state,
+        followedAdvertisements: {
+          ...state.followedAdvertisements,
+          data: state.followedAdvertisements.data.filter(
+            (adv) => adv.id !== action.payload
+          ),
+          loading: false,
+        },
+      };
+    }
+    case getType(Actions.deleteUserFollowedAdvertisementsAsyncAction.failure): {
+      return {
+        ...state,
+        followedAdvertisements: {
+          ...state.followedAdvertisements,
           loading: false,
           error: action.payload,
         },

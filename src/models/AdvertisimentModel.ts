@@ -17,4 +17,5 @@ export interface AdvertisementModel {
   userId: string;
   userName: string;
   phoneNumber: string;
+  userImage: string;
 }

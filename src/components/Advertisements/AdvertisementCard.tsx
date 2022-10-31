@@ -16,15 +16,15 @@ const AdvertisementCard = ({ advertisement, children }: Props) => {
   const navigate = useNavigate();
   const createdAt = useMemo(() => {
     const { date } = advertisement;
-    console.log(date);
-
     return moment(date).format('lll');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [advertisement, dictionary]);
 
   const goToAdv = useCallback(() => {
-    navigate(`/adv?advId=${advertisement.id}`);
-  }, [navigate, advertisement.id]);
+    navigate(`/adv?advId=${advertisement.id}`, {
+      state: advertisement,
+    });
+  }, [navigate, advertisement]);
 
   return (
     <>

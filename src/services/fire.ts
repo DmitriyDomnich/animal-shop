@@ -1,8 +1,10 @@
 import { FirebaseApp, initializeApp } from 'firebase/app';
 import {
   collection,
+  collectionGroup,
   deleteDoc,
   doc,
+  documentId,
   getDocs,
   getFirestore,
   query,
@@ -17,6 +19,7 @@ import { AdvertisementModel } from 'models/AdvertisimentModel';
 import { PlaceModel } from 'models/PlaceModel';
 import { serverTimestamp } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
+import { UserModel } from 'models/UserModel';
 
 export interface APIResponse<T extends object | void | string> {
   success: boolean;
@@ -76,6 +79,19 @@ export const advertisementsConverter = {
           ? pictures.concat(Array.from({ length: 8 - pictures.length }))
           : pictures,
     };
+  },
+};
+export const userConverter = {
+  toFirestore: (user: UserModel): UserModel => {
+    return user;
+  },
+  fromFirestore: (
+    snapshot: QueryDocumentSnapshot,
+    options: SnapshotOptions
+  ): UserModel => {
+    const data = snapshot.data(options) as UserModel;
+
+    return data;
   },
 };
 
@@ -150,9 +166,15 @@ class Fire {
     adv: AdvertisementModel
   ): Promise<APIResponse<AdvertisementModel>> {
     try {
-      await updateDoc(doc(getFirestore(this.app), 'animals', adv.id), {
-        ...adv,
-      });
+      await updateDoc(
+        doc(getFirestore(this.app), 'animals', adv.id).withConverter(
+          advertisementsConverter
+        ),
+        {
+          ...adv,
+          pictures: adv.pictures.filter(Boolean),
+        }
+      );
       return {
         success: true,
         data: adv,
@@ -167,6 +189,88 @@ class Fire {
   async deleteAdvertisement(advId: string): Promise<APIResponse<string>> {
     try {
       await deleteDoc(doc(getFirestore(this.app), 'animals', advId));
+      return {
+        success: true,
+        data: advId,
+      };
+    } catch (err: any) {
+      return {
+        success: false,
+        error: err,
+      };
+    }
+  }
+
+  async getUserFollowedAdvertisements(
+    userId: string
+  ): Promise<APIResponse<AdvertisementModel[]>> {
+    const firestore = getFirestore(this.app);
+    const userQuery = query(
+      collectionGroup(firestore, 'followers'),
+      where('uid', '==', userId)
+    );
+
+    try {
+      const snapshot = await getDocs(userQuery);
+      const advIds = snapshot.docs.map((doc) => doc.ref.parent.parent!.id);
+      if (!advIds.length) {
+        return {
+          success: true,
+          data: [],
+        };
+      }
+      const advsQuery = query(
+        collection(firestore, 'animals'),
+        where(documentId(), 'in', advIds)
+      ).withConverter(advertisementsConverter);
+
+      const advsSnapshot = await getDocs(advsQuery);
+      const advs = advsSnapshot.docs.map((doc) => doc.data());
+      return {
+        success: true,
+        data: advs,
+      };
+    } catch (err: any) {
+      return {
+        error: err,
+        success: false,
+      };
+    }
+  }
+  async postUserFollowedAdvertisement(
+    adv: AdvertisementModel,
+    user: UserModel
+  ): Promise<APIResponse<AdvertisementModel>> {
+    try {
+      await setDoc(
+        doc(
+          getFirestore(this.app),
+          'animals',
+          adv.id,
+          'followers',
+          user.uid
+        ).withConverter(userConverter),
+        user
+      );
+      return {
+        success: true,
+        data: adv,
+      };
+    } catch (err: any) {
+      return {
+        success: false,
+        error: err,
+      };
+    }
+  }
+  async deleteUserFollowedAdvertisement(
+    advId: string,
+    userId: string
+  ): Promise<APIResponse<string>> {
+    try {
+      await deleteDoc(
+        doc(getFirestore(this.app), 'animals', advId, 'followers', userId)
+      );
       return {
         success: true,
         data: advId,
