@@ -24,7 +24,6 @@ const CreateAdvertisementPage = () => {
   );
 
   const { dictionary } = useAppSelector(selectAppLocale);
-  console.log(advertisement);
 
   return (
     <div className='container mx-auto p-4'>

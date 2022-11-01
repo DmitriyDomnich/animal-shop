@@ -65,4 +65,5 @@ export const uaLocale: LanguageDictionary = {
   publisher: 'Видавець',
   showPhone: 'Показати моб. телефон',
   message: 'Повідомлення',
+  loadMore: 'Завантажити ще',
 };

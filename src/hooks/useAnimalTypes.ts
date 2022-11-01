@@ -13,7 +13,7 @@ import { useAppDispatch, useAppSelector } from 'rdx/hooks';
 import { useEffect } from 'react';
 import { useAppCollectionDataOnce } from './useAppCollectionDataOnce';
 
-const postConverter: FirestoreDataConverter<AnimalTypeModel> = {
+const animalTypeConverter: FirestoreDataConverter<AnimalTypeModel> = {
   toFirestore(animalType: WithFieldValue<AnimalTypeModel>): DocumentData {
     return { name: animalType.name, imgURL: animalType.imgURL };
   },
@@ -36,7 +36,7 @@ export const useAnimalTypes = () => {
   const [animalTypes, loading, error] =
     useAppCollectionDataOnce<AnimalTypeModel>({
       path: 'animal-types',
-      converter: postConverter,
+      converter: animalTypeConverter,
       queryConstraints: [orderBy('name')],
     });
 

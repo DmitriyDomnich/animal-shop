@@ -19,7 +19,7 @@ export const ColorModeContext = React.createContext({
 });
 
 const defaultStyles =
-  'h-full min-h-screen bg-indigo-100 dark:bg-indigo-500 scroll-smooth scroll-mt-48';
+  'h-full min-h-screen bg-indigo-100 dark:bg-indigo-500 scroll-smooth scroll-mt-48 pb-3';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
 const CreateAdvertisementPage = lazy(

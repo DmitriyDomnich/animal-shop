@@ -1,3 +1,4 @@
+import React, { useCallback, useMemo } from 'react';
 import {
   Autocomplete,
   Button,
@@ -10,24 +11,48 @@ import {
 import { selectAppLocale } from 'rdx/app/selectors';
 import { useAppSelector } from 'rdx/hooks';
 import SearchIcon from '@mui/icons-material/Search';
+import { usePlaces } from 'hooks/usePlaces';
+import { useSearchParams } from 'react-router-dom';
+import { Places } from 'locales/models';
 
-import React, { useMemo } from 'react';
-
-type Props = {};
-
-const SearchBar = (props: Props) => {
+const SearchBar = () => {
   const { dictionary } = useAppSelector(selectAppLocale);
+  const [, setSearchParams] = useSearchParams();
+
+  const [places] = usePlaces();
+
+  const handleRegionChange = useCallback(
+    (
+      ev: React.SyntheticEvent<Element, Event>,
+      val: {
+        firstLetter: string;
+        title: Places;
+      } | null
+    ) => {
+      if (val) {
+        setSearchParams((prev) => {
+          const newSearchParams = new URLSearchParams(prev);
+          newSearchParams.set('place', val.title);
+          return newSearchParams;
+        });
+      } else {
+        setSearchParams((prev) => ({ ...new URLSearchParams(prev) }));
+      }
+    },
+    [setSearchParams]
+  );
 
   const regions = useMemo(
     () =>
-      dictionary.regions.map((region) => {
-        const firstLetter = region[0].toUpperCase();
+      places.map((region) => {
+        const firstLetter = region.name[0].toUpperCase();
         return {
           firstLetter: /[0-9]/.test(firstLetter) ? '0-9' : firstLetter,
-          title: region,
+          title: region.name,
         };
       }),
-    [dictionary]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [dictionary, places]
   );
 
   return (
@@ -53,9 +78,10 @@ const SearchBar = (props: Props) => {
             options={regions.sort(
               (a, b) => -b.firstLetter.localeCompare(a.firstLetter)
             )}
+            onChange={handleRegionChange}
             className='min-w-[170px]'
             groupBy={(option) => option.firstLetter}
-            getOptionLabel={(option) => option.title}
+            getOptionLabel={(option) => dictionary.places[option.title]}
             renderInput={(params) => (
               <TextField {...params} label={dictionary.filterByRegion} />
             )}

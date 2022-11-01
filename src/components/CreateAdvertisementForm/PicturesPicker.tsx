@@ -118,7 +118,7 @@ const PicturesPicker = ({
             <input
               type='file'
               className='hidden'
-              accept='image/png, image/jpeg, image/gif'
+              accept='image/png, image/jpeg, image/gif, image/webp'
               onChange={handleAddPicture}
               id={`file${index}`}
             />

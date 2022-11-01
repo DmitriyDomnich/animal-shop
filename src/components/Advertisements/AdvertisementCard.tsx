@@ -30,16 +30,19 @@ const AdvertisementCard = ({ advertisement, children }: Props) => {
     <>
       <div
         onClick={goToAdv}
-        className='cursor-pointer p-1 flex-grow sm:flex-grow-0 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 max-w-[366px] transition-transform hover:-translate-y-2'
+        className='cursor-pointer p-2 flex-grow sm:flex-grow-0 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 max-w-[366px] h-full transition-transform hover:-translate-y-2'
       >
         <Card>
-          <CardMedia
-            component='img'
-            height={140}
-            image={advertisement.pictures[0]!.url}
-          />
+          <CardMedia>
+            <div
+              style={{
+                backgroundImage: `url(${advertisement.pictures[0]!.url})`,
+              }}
+              className='h-[240px] bg-cover bg-no-repeat bg-center'
+            ></div>
+          </CardMedia>
           <CardContent>
-            <h2 className='font-bold text-xl line-clamp-2 cursor-text'>
+            <h2 className='font-bold text-xl line-clamp-2 cursor-text min-h-[3em]'>
               {advertisement.name}
             </h2>
             <h4 className='text-sm my-6'>

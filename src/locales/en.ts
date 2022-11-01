@@ -65,4 +65,5 @@ export const enLocale: LanguageDictionary = {
   publisher: 'Publisher',
   showPhone: 'Show mobile phone',
   message: 'Message',
+  loadMore: 'Load more',
 };

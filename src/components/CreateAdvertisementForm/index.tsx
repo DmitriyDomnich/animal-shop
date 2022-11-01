@@ -23,8 +23,6 @@ import React, {
 } from 'react';
 import PicturesPicker from './PicturesPicker';
 import { v4 as createId } from 'uuid';
-import { getAllPlaces } from 'rdx/places/thunks';
-import { selectPlaces } from 'rdx/places/selectors';
 import { useAppAuth } from 'hooks/useAppAuth';
 import {
   deleteAdvertisement,
@@ -33,6 +31,7 @@ import {
 } from 'rdx/advertisements/thunks';
 import { selectUserAdvertisements } from 'rdx/advertisements/selectors';
 import { useNavigate } from 'react-router-dom';
+import { usePlaces } from 'hooks/usePlaces';
 
 type Props = {
   advertisement?: AdvertisementModel;
@@ -71,15 +70,11 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
   const { dictionary } = useAppSelector(selectAppLocale);
   const [animalTypes] = useAnimalTypes();
   const dispatch = useAppDispatch();
-  const [places] = useAppSelector(selectPlaces);
+  const [places] = usePlaces();
   const [, advLoading] = useAppSelector(selectUserAdvertisements);
   const [user] = useAppAuth();
   const [formError, setFormError] = useState('');
   const navigate = useNavigate();
-
-  useEffect(() => {
-    dispatch(getAllPlaces());
-  }, [dispatch]);
 
   const advertisementId = useMemo(
     () => advertisement?.id || createId(),
@@ -122,7 +117,6 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
     ({ target }: React.ChangeEvent<HTMLInputElement>) => {
       const name = target.name as keyof AdvertisementFormStateModel;
       const value = target.value;
-      console.log('calledd');
 
       setFormState((prev) => ({
         ...prev,
@@ -154,8 +148,6 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
 
   const onPlaceSelected = useCallback(
     (value: Places | '') => {
-      console.log(value);
-
       setFormState((prev) => ({
         ...prev,
         place: {
@@ -193,7 +185,6 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
         },
         {} as any
       );
-      advToPost.userImage = user!.photoURL || '';
       advToPost.id = advertisementId;
       if (advertisement) {
         dispatch(updateAdvertisement(advToPost)).then((_) => navigate('/'));
@@ -201,7 +192,7 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
         dispatch(postAdvertisement(advToPost)).then((_) => navigate('/'));
       }
     },
-    [formState, advertisementId, dispatch, advertisement, navigate, user]
+    [formState, advertisementId, dispatch, advertisement, navigate]
   );
   const handleDelete = useCallback(() => {
     dispatch(deleteAdvertisement(advertisementId)).then((_) => navigate('/'));

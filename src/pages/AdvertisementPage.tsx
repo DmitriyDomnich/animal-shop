@@ -14,27 +14,34 @@ import {
   postUserFollowedAdvertisement,
 } from 'rdx/advertisements/thunks';
 import { useAppAuth } from 'hooks/useAppAuth';
+import { useAppDocumentDataOnce } from 'hooks/useAppDocumentDataOnce';
+import { PublisherModel } from 'models/UserModel';
 
 const AdvertisementPage = () => {
   const { dictionary } = useAppSelector(selectAppLocale);
   const [followedAdvs, followedLoading] = useUserFollowedAdvertisements();
   const [advertisement, advLoading] = useAdvertisement();
-  const [user] = useAppAuth();
+  const [currUser] = useAppAuth();
   const dispatch = useAppDispatch();
+
+  const [advPublisher, advPublisherLoading] = useAppDocumentDataOnce({
+    path: 'users',
+    pathSegments: [advertisement.userId],
+  });
 
   const [showPhone, setShowPhone] = useState(false);
 
   const handleUnfollowAdvertisement = useCallback(() => {
-    dispatch(deleteUserFollowedAdvertisement(advertisement.id, user!.uid));
-  }, [advertisement.id, dispatch, user]);
+    dispatch(deleteUserFollowedAdvertisement(advertisement.id, currUser!.uid));
+  }, [advertisement.id, dispatch, currUser]);
   const handleFollowAdvertisement = useCallback(() => {
     dispatch(
       postUserFollowedAdvertisement(advertisement, {
-        email: user!.email!,
-        uid: user!.uid,
+        email: currUser!.email!,
+        uid: currUser!.uid,
       })
     );
-  }, [advertisement, dispatch, user]);
+  }, [advertisement, dispatch, currUser]);
   const changeShowPhone = useCallback(
     () => setShowPhone((prev) => !prev),
     [setShowPhone]
@@ -43,7 +50,9 @@ const AdvertisementPage = () => {
   return (
     <>
       <div className='container my-5 mx-auto'>
-        {!followedLoading || !advLoading ? (
+        {followedLoading || advLoading || advPublisherLoading ? (
+          <CircularProgress />
+        ) : (
           <>
             <div className='p-5 flex flex-wrap bg-gray-200 dark:bg-gray-700 rounded-b-lg shadow-lg'>
               <div className='basis-full md:basis-2/5'>
@@ -109,7 +118,7 @@ const AdvertisementPage = () => {
                 {dictionary.publisher}
               </h4>
               <h3 className='text-3xl text-gray-800 dark:text-gray-200 flex space-x-3'>
-                <Avatar src={advertisement.userImage} />
+                <Avatar src={(advPublisher as PublisherModel)!.imageUrl} />
                 <span>{advertisement.userName}</span>
               </h3>
               <h4 className='text-xl text-gray-800 dark:text-gray-200'>
@@ -128,8 +137,6 @@ const AdvertisementPage = () => {
               </div>
             </div>
           </>
-        ) : (
-          <CircularProgress />
         )}
       </div>
     </>

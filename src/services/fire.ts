@@ -5,19 +5,19 @@ import {
   deleteDoc,
   doc,
   documentId,
+  Firestore,
   getDocs,
   getFirestore,
   query,
+  QueryConstraint,
   QueryDocumentSnapshot,
   setDoc,
   SnapshotOptions,
-  Timestamp,
   updateDoc,
   where,
 } from 'firebase/firestore';
 import { AdvertisementModel } from 'models/AdvertisimentModel';
 import { PlaceModel } from 'models/PlaceModel';
-import { serverTimestamp } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { UserModel } from 'models/UserModel';
 
@@ -28,12 +28,12 @@ export interface APIResponse<T extends object | void | string> {
 }
 
 const appConfig = {
-  apiKey: 'AIzaSyAs2S0VB5G8nDCIS7OsxEJ4bH4JJbeoWv0',
-  authDomain: 'animal-shop-69390.firebaseapp.com',
-  projectId: 'animal-shop-69390',
-  storageBucket: 'animal-shop-69390.appspot.com',
-  messagingSenderId: '185500411411',
-  appId: '1:185500411411:web:98c09b9ce9062b2cd441e6',
+  apiKey: 'AIzaSyCCIuAMNjY194cSN5_Suh_x4ldHKfpuH3w',
+  authDomain: 'animal-shop-2.firebaseapp.com',
+  projectId: 'animal-shop-2',
+  storageBucket: 'animal-shop-2.appspot.com',
+  messagingSenderId: '461108934805',
+  appId: '1:461108934805:web:a12fc813b2002bd1abc39c',
 };
 const firebaseApp = initializeApp(appConfig);
 
@@ -59,7 +59,7 @@ export const advertisementsConverter = {
   toFirestore: (adv: AdvertisementModel): AdvertisementModel => {
     return {
       ...adv,
-      date: serverTimestamp(),
+      date: Date.now(),
       userId: getAuth(firebaseApp).currentUser!.uid,
       pictures: adv.pictures.filter(Boolean),
     };
@@ -73,7 +73,6 @@ export const advertisementsConverter = {
     return {
       ...data,
       id: snapshot.id,
-      date: +new Timestamp(data.date.seconds, data.date.nanoseconds).toDate(),
       pictures:
         pictures.length < 8
           ? pictures.concat(Array.from({ length: 8 - pictures.length }))
@@ -96,13 +95,36 @@ export const userConverter = {
 };
 
 class Fire {
-  constructor(private app: FirebaseApp) {}
+  private db: Firestore;
+  constructor(private app: FirebaseApp) {
+    this.db = getFirestore(app);
+  }
+
+  async getAdvertisements(queryConstraints: QueryConstraint[]): Promise<{
+    data: AdvertisementModel[];
+    lastSnapshotRef: QueryDocumentSnapshot<AdvertisementModel>;
+  } | null> {
+    const advsQuery = query(
+      collection(this.db, 'animals').withConverter(advertisementsConverter),
+      ...queryConstraints
+    );
+    try {
+      const snapshot = await getDocs(advsQuery);
+      const advs = snapshot.docs.map((adv) => adv.data());
+      const lastSnapshotRef = snapshot.docs[snapshot.docs.length - 1];
+      return {
+        data: advs,
+        lastSnapshotRef,
+      };
+    } catch (err: any) {
+      console.log(err);
+      return null;
+    }
+  }
 
   async getAllPlaces(): Promise<APIResponse<PlaceModel[]>> {
     const placesQuery = query(
-      collection(getFirestore(this.app), 'places').withConverter(
-        placesConverter
-      )
+      collection(this.db, 'places').withConverter(placesConverter)
     );
     try {
       const snapshot = await getDocs(placesQuery);
@@ -113,7 +135,7 @@ class Fire {
       };
     } catch (err: any) {
       return {
-        error: err,
+        error: err.toString(),
         success: false,
       };
     }
@@ -122,9 +144,7 @@ class Fire {
     userId: string
   ): Promise<APIResponse<AdvertisementModel[]>> {
     const advQuery = query(
-      collection(getFirestore(this.app), 'animals').withConverter(
-        advertisementsConverter
-      ),
+      collection(this.db, 'animals').withConverter(advertisementsConverter),
       where('userId', '==', userId)
     );
     try {
@@ -136,7 +156,7 @@ class Fire {
       };
     } catch (err: any) {
       return {
-        error: err,
+        error: err.toString(),
         success: false,
       };
     }
@@ -146,9 +166,7 @@ class Fire {
   ): Promise<APIResponse<AdvertisementModel>> {
     try {
       await setDoc(
-        doc(getFirestore(this.app), 'animals', adv.id).withConverter(
-          advertisementsConverter
-        ),
+        doc(this.db, 'animals', adv.id).withConverter(advertisementsConverter),
         adv
       );
       return {
@@ -158,7 +176,7 @@ class Fire {
     } catch (err: any) {
       return {
         success: false,
-        error: err,
+        error: err.toString(),
       };
     }
   }
@@ -167,9 +185,7 @@ class Fire {
   ): Promise<APIResponse<AdvertisementModel>> {
     try {
       await updateDoc(
-        doc(getFirestore(this.app), 'animals', adv.id).withConverter(
-          advertisementsConverter
-        ),
+        doc(this.db, 'animals', adv.id).withConverter(advertisementsConverter),
         {
           ...adv,
           pictures: adv.pictures.filter(Boolean),
@@ -182,13 +198,13 @@ class Fire {
     } catch (err: any) {
       return {
         success: false,
-        error: err,
+        error: err.toString(),
       };
     }
   }
   async deleteAdvertisement(advId: string): Promise<APIResponse<string>> {
     try {
-      await deleteDoc(doc(getFirestore(this.app), 'animals', advId));
+      await deleteDoc(doc(this.db, 'animals', advId));
       return {
         success: true,
         data: advId,
@@ -196,7 +212,7 @@ class Fire {
     } catch (err: any) {
       return {
         success: false,
-        error: err,
+        error: err.toString(),
       };
     }
   }
@@ -204,7 +220,7 @@ class Fire {
   async getUserFollowedAdvertisements(
     userId: string
   ): Promise<APIResponse<AdvertisementModel[]>> {
-    const firestore = getFirestore(this.app);
+    const firestore = this.db;
     const userQuery = query(
       collectionGroup(firestore, 'followers'),
       where('uid', '==', userId)
@@ -232,7 +248,7 @@ class Fire {
       };
     } catch (err: any) {
       return {
-        error: err,
+        error: err.toString(),
         success: false,
       };
     }
@@ -243,13 +259,9 @@ class Fire {
   ): Promise<APIResponse<AdvertisementModel>> {
     try {
       await setDoc(
-        doc(
-          getFirestore(this.app),
-          'animals',
-          adv.id,
-          'followers',
-          user.uid
-        ).withConverter(userConverter),
+        doc(this.db, 'animals', adv.id, 'followers', user.uid).withConverter(
+          userConverter
+        ),
         user
       );
       return {
@@ -259,7 +271,7 @@ class Fire {
     } catch (err: any) {
       return {
         success: false,
-        error: err,
+        error: err.toString(),
       };
     }
   }
@@ -268,9 +280,7 @@ class Fire {
     userId: string
   ): Promise<APIResponse<string>> {
     try {
-      await deleteDoc(
-        doc(getFirestore(this.app), 'animals', advId, 'followers', userId)
-      );
+      await deleteDoc(doc(this.db, 'animals', advId, 'followers', userId));
       return {
         success: true,
         data: advId,
@@ -278,7 +288,7 @@ class Fire {
     } catch (err: any) {
       return {
         success: false,
-        error: err,
+        error: err.toString(),
       };
     }
   }
