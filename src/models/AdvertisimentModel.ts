@@ -13,6 +13,7 @@ export interface AdvertisementModel {
   price: number;
   type: AnimalType;
   pictures: Array<PictureModel | null>;
+  tags: string[];
   place: Places;
   userId: string;
   userName: string;

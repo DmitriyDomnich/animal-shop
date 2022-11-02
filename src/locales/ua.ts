@@ -66,4 +66,7 @@ export const uaLocale: LanguageDictionary = {
   showPhone: 'Показати моб. телефон',
   message: 'Повідомлення',
   loadMore: 'Завантажити ще',
+  tags: 'Теги',
+  enterTags: 'Впишiть примiтнi факти (наприклад колiр, порода тощо)',
+  add: 'Додати',
 };

@@ -1,5 +1,6 @@
 import { FirebaseApp, initializeApp } from 'firebase/app';
 import {
+  addDoc,
   collection,
   collectionGroup,
   deleteDoc,
@@ -100,6 +101,27 @@ class Fire {
     this.db = getFirestore(app);
   }
 
+  async getTagsByTerm(term: string): Promise<APIResponse<string[]>> {
+    try {
+      const tagsQuery = query(
+        collection(this.db, 'tags'),
+        where('name', '>=', term),
+        where('name', '<=', term + '\uf8ff')
+      );
+      const snapshot = await getDocs(tagsQuery);
+      const tagNames = snapshot.docs.map((doc) => doc.data().name);
+      return {
+        data: tagNames,
+        success: true,
+      };
+    } catch (err: any) {
+      return {
+        success: false,
+        error: err.toString(),
+      };
+    }
+  }
+
   async getAdvertisements(queryConstraints: QueryConstraint[]): Promise<{
     data: AdvertisementModel[];
     lastSnapshotRef: QueryDocumentSnapshot<AdvertisementModel>;
@@ -169,6 +191,13 @@ class Fire {
         doc(this.db, 'animals', adv.id).withConverter(advertisementsConverter),
         adv
       );
+      if (adv.tags.length) {
+        for await (const tag of adv.tags) {
+          await addDoc(collection(this.db, 'tags'), {
+            name: tag,
+          });
+        }
+      }
       return {
         success: true,
         data: adv,
@@ -220,9 +249,8 @@ class Fire {
   async getUserFollowedAdvertisements(
     userId: string
   ): Promise<APIResponse<AdvertisementModel[]>> {
-    const firestore = this.db;
     const userQuery = query(
-      collectionGroup(firestore, 'followers'),
+      collectionGroup(this.db, 'followers'),
       where('uid', '==', userId)
     );
 
@@ -236,7 +264,7 @@ class Fire {
         };
       }
       const advsQuery = query(
-        collection(firestore, 'animals'),
+        collection(this.db, 'animals'),
         where(documentId(), 'in', advIds)
       ).withConverter(advertisementsConverter);
 

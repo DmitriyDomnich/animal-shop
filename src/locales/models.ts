@@ -47,6 +47,9 @@ export interface LanguageDictionary {
   showPhone: string;
   message: string;
   loadMore: string;
+  tags: string;
+  enterTags: string;
+  add: string;
 }
 export type Places = 'KHR' | 'KY' | 'LV' | 'CHT' | 'CHN' | 'OD' | 'KHE';
 export type AnimalType =

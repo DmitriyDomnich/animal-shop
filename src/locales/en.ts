@@ -66,4 +66,7 @@ export const enLocale: LanguageDictionary = {
   showPhone: 'Show mobile phone',
   message: 'Message',
   loadMore: 'Load more',
+  tags: 'Tags',
+  enterTags: 'Enter notable facts (eg color, breed, etc.)',
+  add: 'Add',
 };

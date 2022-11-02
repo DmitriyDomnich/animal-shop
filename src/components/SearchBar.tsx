@@ -1,11 +1,9 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   Autocomplete,
   Button,
-  FormControl,
+  CircularProgress,
   InputAdornment,
-  InputLabel,
-  OutlinedInput,
   TextField,
 } from '@mui/material';
 import { selectAppLocale } from 'rdx/app/selectors';
@@ -14,10 +12,11 @@ import SearchIcon from '@mui/icons-material/Search';
 import { usePlaces } from 'hooks/usePlaces';
 import { useSearchParams } from 'react-router-dom';
 import { Places } from 'locales/models';
+import { useSearchAutocomplete } from 'hooks/useSearchAutocomplete';
 
 const SearchBar = () => {
   const { dictionary } = useAppSelector(selectAppLocale);
-  const [, setSearchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [places] = usePlaces();
 
@@ -41,6 +40,17 @@ const SearchBar = () => {
     },
     [setSearchParams]
   );
+  const [searchTerm, setSearchTerm] = useState('');
+  const [terms, areTermsLoading] = useSearchAutocomplete(
+    searchTerm.length > 2 ? searchTerm : null
+  );
+
+  const handleSearchTermChange = useCallback(
+    (ev: any) => {
+      setSearchTerm(ev!.target.value);
+    },
+    [setSearchTerm]
+  );
 
   const regions = useMemo(
     () =>
@@ -54,24 +64,59 @@ const SearchBar = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [dictionary, places]
   );
+  const handleSearchPress = useCallback(() => {
+    const prevTagQuery = searchParams.get('tags');
+    if (!searchTerm) {
+      setSearchParams((prev) => {
+        const prevSearchParams = new URLSearchParams(prev);
+        prevSearchParams.delete('tags');
+        return prevSearchParams;
+      });
+    }
+    if (searchTerm && (!prevTagQuery || prevTagQuery !== searchTerm)) {
+      setSearchParams((prev) => {
+        const prevSearchParams = new URLSearchParams(prev);
+        prevSearchParams.set('tags', searchTerm);
+        return prevSearchParams;
+      });
+    }
+  }, [searchParams, searchTerm, setSearchParams]);
+  const handleAutocompleteOptionSelect = useCallback(
+    (_: React.SyntheticEvent<Element, Event>, val: string | null) => {
+      setSearchTerm(val ? val : '');
+    },
+    [setSearchTerm]
+  );
 
   return (
     <form className='h-44 bg-indigo-300 dark:bg-gray-600 flex justify-center items-center p-3'>
       <div className='flex w-full md:w-2/3 space-x-2'>
         <div className='flex-grow'>
-          <FormControl fullWidth>
-            <InputLabel htmlFor='outlined-adornment-amount'>
-              {dictionary.searchBarText}
-            </InputLabel>
-            <OutlinedInput
-              startAdornment={
-                <InputAdornment position='start'>
-                  <SearchIcon />
-                </InputAdornment>
-              }
-              label={dictionary.searchBarText}
-            />
-          </FormControl>
+          <Autocomplete
+            options={terms}
+            loading={areTermsLoading}
+            onChange={handleAutocompleteOptionSelect}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                InputProps={{
+                  ...params.InputProps,
+                  endAdornment: (
+                    <InputAdornment position='end'>
+                      {areTermsLoading ? <CircularProgress size={20} /> : null}
+                    </InputAdornment>
+                  ),
+                  startAdornment: (
+                    <InputAdornment position='start'>
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                }}
+                onChange={handleSearchTermChange}
+                label={dictionary.searchBarText}
+              />
+            )}
+          />
         </div>
         <div>
           <Autocomplete
@@ -89,6 +134,7 @@ const SearchBar = () => {
         </div>
         <div>
           <Button
+            onClick={handleSearchPress}
             className='h-full'
             color='secondary'
             endIcon={<SearchIcon />}

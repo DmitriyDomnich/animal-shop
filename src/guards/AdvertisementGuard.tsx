@@ -8,7 +8,6 @@ import { advertisementsConverter } from 'services/fire';
 export const AdvertisementGuard = ({ children }: { children: JSX.Element }) => {
   const [user] = useAppAuth();
   const [searchParams] = useSearchParams();
-
   const advId = useMemo(() => searchParams.get('advId'), [searchParams]);
 
   const [adv] = useAppDocumentDataOnce(
@@ -22,7 +21,7 @@ export const AdvertisementGuard = ({ children }: { children: JSX.Element }) => {
   );
 
   if ((adv as AdvertisementModel)?.userId === user?.uid) {
-    return <Navigate to={`/post?advId=${advId}`} />;
+    return <Navigate to={`/post?advId=${advId}`} replace />;
   }
 
   return children;

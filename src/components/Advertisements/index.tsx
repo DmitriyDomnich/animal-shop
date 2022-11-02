@@ -21,6 +21,7 @@ import {
 import { useUserFollowedAdvertisements } from 'hooks/useUserFollowedAdvertisements';
 import { useSearchParams } from 'react-router-dom';
 import Fire from 'services/fire';
+import DownloadingIcon from '@mui/icons-material/Downloading';
 
 type AdvertisementsState = {
   loading: boolean;
@@ -44,7 +45,7 @@ const Advertisements = () => {
   useEffect(() => {
     setAdvertisements((prev) => ({ ...prev, loading: true, error: null }));
     const filters = Array.from(searchParams.entries()).map(([key, val]) =>
-      where(key, '==', val)
+      where(key, key === 'tags' ? 'array-contains' : '==', val)
     );
 
     const constraints = [
@@ -54,6 +55,8 @@ const Advertisements = () => {
       limit(2),
     ];
     Fire.getAdvertisements(constraints).then((val) => {
+      console.log(val);
+
       if (val) {
         setAdvertisements({
           data: val.data,
@@ -75,7 +78,7 @@ const Advertisements = () => {
   const handleLoadMore = useCallback(async () => {
     setAdvertisements((prev) => ({ ...prev, loading: true, error: null }));
     const filters = Array.from(searchParams.entries()).map(([key, val]) =>
-      where(key, '==', val)
+      where(key, key === 'tags' ? 'array-contains' : '==', val)
     );
     Fire.getAdvertisements([
       where('date', '<=', new Date().setMinutes(0, 0)),
@@ -167,7 +170,8 @@ const Advertisements = () => {
               onClick={handleLoadMore}
               color='primary'
             >
-              {dictionary.loadMore}
+              <span className='mr-1'>{dictionary.loadMore}</span>{' '}
+              <DownloadingIcon />
             </Button>
           </div>
         </>

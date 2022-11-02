@@ -32,6 +32,8 @@ import {
 import { selectUserAdvertisements } from 'rdx/advertisements/selectors';
 import { useNavigate } from 'react-router-dom';
 import { usePlaces } from 'hooks/usePlaces';
+import { useRef } from 'react';
+import AdvTags from './AdvTags';
 
 type Props = {
   advertisement?: AdvertisementModel;
@@ -51,6 +53,7 @@ export type AdvertisementFormStateModel = {
     value: (PictureModel | null)[];
     isTouched: boolean;
   };
+  tags: { value: string[]; isTouched: true };
   description: string;
   place: {
     isTouched: boolean;
@@ -81,6 +84,8 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
     [advertisement]
   );
 
+  const tagsInputRef = useRef<HTMLInputElement>(null);
+
   const [formState, setFormState] = useState<AdvertisementFormStateModel>({
     name: advertisement
       ? { value: advertisement.name, isTouched: true }
@@ -98,6 +103,9 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
           value: Array.from<null | PictureModel>({ length: 8 }).fill(null),
           isTouched: false,
         },
+    tags: advertisement
+      ? { value: advertisement.tags || [], isTouched: true }
+      : { value: [], isTouched: true },
     description: advertisement ? advertisement.description : '',
     place: advertisement
       ? { value: advertisement.place, isTouched: true }
@@ -158,6 +166,17 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
     },
     [setFormState]
   );
+  const handleTagAdd = useCallback(() => {
+    const newTag = tagsInputRef.current!.value;
+
+    if (newTag && !formState.tags.value.find((currTag) => currTag === newTag)) {
+      setFormState((prev) => ({
+        ...prev,
+        tags: { value: prev.tags.value.concat(newTag), isTouched: true },
+      }));
+      tagsInputRef.current!.value = '';
+    }
+  }, [setFormState, tagsInputRef, formState]);
 
   const handleSubmit = useCallback(
     async (ev: FormEvent) => {
@@ -266,43 +285,77 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
             0
           ) && <div className='text-red-600 text-sm ml-2'>Wrong input</div>}
       </div>
-      <div className='mt-5 bg-indigo-300 dark:bg-gray-700 p-4'>
-        <h5 className='text-md text-sky-900 dark:text-sky-300 mt-3 mb-2'>
-          {dictionary.description}*
-        </h5>
-        <div className='flex flex-col w-full md:w-2/3 lg:w-1/2'>
-          <Tooltip
-            title='Write a description for your animal'
-            placement='right'
-          >
-            <TextField
-              name='description'
-              required
-              value={formState.description}
-              onChange={handleFormValueChange}
-              variant='filled'
-              fullWidth
-              multiline
-              rows={10}
-              inputProps={{ maxLength: 1000, minLength: 50 }}
-            />
-          </Tooltip>
-          <h5
-            className={`flex justify-between text-md text-gray-500 dark:text-gray-400 mt-5 ${
-              formState.description.length < 50 ? 'flex-row-reverse' : ''
-            }`}
-          >
-            <span>
-              {formState.description.length < 50
-                ? `${dictionary.writeMore} ${
-                    50 - formState.description.length
-                  } ${dictionary.symbols[1]}`
-                : ''}
-            </span>
-            <span className='text-end'>
-              {formState.description.length}/1000
-            </span>
+      <div className='mt-5 bg-indigo-300 dark:bg-gray-700 p-4 flex flex-wrap'>
+        <div className='w-full md:w-1/2 pr-5'>
+          <h5 className='text-md text-sky-900 dark:text-sky-300 mt-3 mb-2'>
+            {dictionary.description}*
           </h5>
+          <div className='flex flex-col w-full'>
+            <Tooltip
+              title='Write a description for your animal'
+              placement='right'
+            >
+              <TextField
+                name='description'
+                required
+                value={formState.description}
+                onChange={handleFormValueChange}
+                variant='filled'
+                fullWidth
+                multiline
+                rows={10}
+                inputProps={{ maxLength: 1000, minLength: 50 }}
+              />
+            </Tooltip>
+            <h5
+              className={`flex justify-between text-md text-gray-500 dark:text-gray-400 mt-5 ${
+                formState.description.length < 50 ? 'flex-row-reverse' : ''
+              }`}
+            >
+              <span>
+                {formState.description.length < 50
+                  ? `${dictionary.writeMore} ${
+                      50 - formState.description.length
+                    } ${dictionary.symbols[1]}`
+                  : ''}
+              </span>
+              <span className='text-end'>
+                {formState.description.length}/1000
+              </span>
+            </h5>
+          </div>
+        </div>
+        <div className='w-full md:w-1/2'>
+          <h5 className='text-md text-sky-900 dark:text-sky-300 mt-3 mb-2'>
+            {dictionary.tags}
+          </h5>
+          <div className='flex flex-col space-y-2'>
+            <div className='flex space-x-2'>
+              <TextField
+                label={dictionary.enterTags}
+                defaultValue=''
+                size='small'
+                inputRef={tagsInputRef}
+                className='win-w-[300px] w-3/4'
+              />
+              <Button
+                color='secondary'
+                variant='contained'
+                onClick={handleTagAdd}
+              >
+                {dictionary.add}
+              </Button>
+            </div>
+            {formState.tags.value.length ? (
+              <div className='flex flex-wrap space-x-2 space-y-2 bg-[#7ca6db] dark:bg-neutral-800 shadow-lg p-3 pb-5'>
+                <AdvTags
+                  deletable
+                  onDeleteTag={setFormState}
+                  tags={formState.tags.value}
+                />
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
       <div className='mt-5 bg-indigo-300 dark:bg-gray-700 p-4 flex space-x-10'>

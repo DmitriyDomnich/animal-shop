@@ -34,7 +34,6 @@ const CreateAdvertisementPage = () => {
               ? dictionary.updateAdvertisement
               : dictionary.createAdvertisement}
           </h1>
-
           <CreateAdvertisementForm
             advertisement={advertisement as AdvertisementModel}
           />

@@ -5,6 +5,7 @@ import { useAppSelector } from 'rdx/hooks';
 import { selectAppLocale } from 'rdx/app/selectors';
 import moment from 'moment';
 import { useNavigate } from 'react-router-dom';
+import AdvTags from 'components/CreateAdvertisementForm/AdvTags';
 
 type Props = {
   advertisement: AdvertisementModel;
@@ -45,7 +46,16 @@ const AdvertisementCard = ({ advertisement, children }: Props) => {
             <h2 className='font-bold text-xl line-clamp-2 cursor-text min-h-[3em]'>
               {advertisement.name}
             </h2>
-            <h4 className='text-sm my-6'>
+            {advertisement.tags?.length ? (
+              <div className='flex flex-wrap space-x-2 space-y-2 line-clamp-2 my-3 min-h-[4.5em]'>
+                <AdvTags size='small' tags={advertisement.tags} />
+              </div>
+            ) : (
+              <div className='text-md my-3 line-clamp-3 min-h-[4.5em]'>
+                {advertisement.description}
+              </div>
+            )}
+            <h4 className='text-sm'>
               {dictionary.places[advertisement.place]} {dictionary.region} -{' '}
               {createdAt}
             </h4>
