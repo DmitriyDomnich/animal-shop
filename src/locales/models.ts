@@ -50,6 +50,10 @@ export interface LanguageDictionary {
   tags: string;
   enterTags: string;
   add: string;
+  messages: string;
+  chatRoomNoSelectedText: string;
+  writeMessage: string;
+  noMessages: string;
 }
 export type Places = 'KHR' | 'KY' | 'LV' | 'CHT' | 'CHN' | 'OD' | 'KHE';
 export type AnimalType =

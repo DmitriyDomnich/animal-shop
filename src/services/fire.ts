@@ -7,8 +7,11 @@ import {
   doc,
   documentId,
   Firestore,
+  getDoc,
   getDocs,
   getFirestore,
+  limit,
+  orderBy,
   query,
   QueryConstraint,
   QueryDocumentSnapshot,
@@ -20,7 +23,8 @@ import {
 import { AdvertisementModel } from 'models/AdvertisimentModel';
 import { PlaceModel } from 'models/PlaceModel';
 import { getAuth } from 'firebase/auth';
-import { UserModel } from 'models/UserModel';
+import { PublisherModel, UserModel } from 'models/UserModel';
+import { ChatPreviewModel } from 'models/ChatPreviewModel';
 
 export interface APIResponse<T extends object | void | string> {
   success: boolean;
@@ -82,14 +86,14 @@ export const advertisementsConverter = {
   },
 };
 export const userConverter = {
-  toFirestore: (user: UserModel): UserModel => {
+  toFirestore: (user: PublisherModel): PublisherModel => {
     return user;
   },
   fromFirestore: (
     snapshot: QueryDocumentSnapshot,
     options: SnapshotOptions
-  ): UserModel => {
-    const data = snapshot.data(options) as UserModel;
+  ): PublisherModel => {
+    const data = snapshot.data(options) as PublisherModel;
 
     return data;
   },
@@ -99,6 +103,54 @@ class Fire {
   private db: Firestore;
   constructor(private app: FirebaseApp) {
     this.db = getFirestore(app);
+  }
+
+  async getChatPreviews(
+    roomId: string,
+    userId: string,
+    animalId: string
+  ): Promise<APIResponse<ChatPreviewModel>> {
+    try {
+      const lastMessageQuery = query(
+        collection(this.db, 'rooms', roomId, 'messages'),
+        orderBy('createdAt', 'desc'),
+        limit(1)
+      );
+      const userPreviewQuery = doc(this.db, 'users', userId).withConverter(
+        userConverter
+      );
+      const advertisementUserQuery = doc(
+        this.db,
+        'animals',
+        animalId
+      ).withConverter(advertisementsConverter);
+      const [messageSnapshot, userSnapshot, advertisementSnapshot] =
+        await Promise.all([
+          getDocs(lastMessageQuery),
+          getDoc(userPreviewQuery),
+          getDoc(advertisementUserQuery),
+        ]);
+      const userData = userSnapshot.data()!;
+      const messageData = messageSnapshot.docs[0].data();
+      const advertisementUserData = advertisementSnapshot.data()!;
+      const result: ChatPreviewModel = {
+        userName: advertisementUserData.userName,
+        imgUrl: userData.imageUrl,
+        createdAt: messageData.createdAt,
+        lastMessage: messageData.text,
+        phoneNumber: advertisementUserData.phoneNumber,
+        roomId,
+      };
+      return {
+        success: true,
+        data: result,
+      };
+    } catch (err: any) {
+      return {
+        success: false,
+        error: err.toString(),
+      };
+    }
   }
 
   async getTagsByTerm(term: string): Promise<APIResponse<string[]>> {

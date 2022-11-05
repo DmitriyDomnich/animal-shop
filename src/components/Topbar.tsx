@@ -17,6 +17,7 @@ import { useAppAuth } from 'hooks/useAppAuth';
 import { signOut } from 'firebase/auth';
 import { AuthContext, ColorModeContext } from 'App';
 import { useNavigate } from 'react-router-dom';
+import ChatBubbleIcon from '@mui/icons-material/ChatBubble';
 
 type AvatarConfig = {
   alt: string;
@@ -105,6 +106,7 @@ const Topbar = () => {
   const goToFollowedAdvertisements = useCallback(() => {
     navigate('/followed');
   }, [navigate]);
+  const goToChats = useCallback(() => navigate('/chats'), [navigate]);
 
   return (
     <nav className='container z-10 mx-auto drop-shadow-xl sticky top-0 px-2 py-1 bg-slate-200 dark:bg-slate-700 h-16 flex items-center justify-between'>
@@ -133,6 +135,12 @@ const Topbar = () => {
               </MenuItem>
               <MenuItem onClick={handleSignOut}>{dictionary.signOut}</MenuItem>
             </Menu>
+            <Button onClick={goToChats} variant='text' color='secondary'>
+              {dictionary.messages}{' '}
+              <span className='ml-2'>
+                <ChatBubbleIcon />
+              </span>
+            </Button>
           </div>
         )}
       </div>

@@ -69,4 +69,8 @@ export const uaLocale: LanguageDictionary = {
   tags: 'Теги',
   enterTags: 'Впишiть примiтнi факти (наприклад колiр, порода тощо)',
   add: 'Додати',
+  messages: 'Повідомлення',
+  chatRoomNoSelectedText: 'Виберiть чат для подальшого спiлкування',
+  writeMessage: 'Напишіть повідомлення...',
+  noMessages: 'Напишіть перше повідомлення',
 };

@@ -69,4 +69,8 @@ export const enLocale: LanguageDictionary = {
   tags: 'Tags',
   enterTags: 'Enter notable facts (eg color, breed, etc.)',
   add: 'Add',
+  messages: 'Messages',
+  chatRoomNoSelectedText: 'Choose a chat room to start conversating',
+  writeMessage: 'Write a message...',
+  noMessages: 'Write first message',
 };

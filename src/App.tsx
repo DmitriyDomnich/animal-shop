@@ -22,10 +22,11 @@ const defaultStyles =
   'h-full min-h-screen bg-indigo-100 dark:bg-indigo-500 scroll-smooth scroll-mt-48 pb-3';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
+const ChatsPage = lazy(() => import('./pages/ChatsPage'));
+const MyAdvertisementsPage = lazy(() => import('./pages/MyAdvertisementsPage'));
 const CreateAdvertisementPage = lazy(
   () => import('./pages/CreateAdvertisementPage')
 );
-const MyAdvertisementsPage = lazy(() => import('./pages/MyAdvertisementsPage'));
 const FollowedAdvertisementsPage = lazy(
   () => import('./pages/FollowedAdvertisementsPage')
 );
@@ -124,6 +125,16 @@ function App() {
                   </AuthGuard>
                 }
                 path='/my-advs'
+              />
+              <Route
+                element={
+                  <AuthGuard>
+                    <Suspense fallback={<div>...loading</div>}>
+                      <ChatsPage />
+                    </Suspense>
+                  </AuthGuard>
+                }
+                path='/chats'
               />
               <Route element={<SignInPage />} path='sign-in' />
             </Routes>
