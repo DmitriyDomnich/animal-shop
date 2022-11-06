@@ -73,7 +73,7 @@ export const useChatPreviews = (): [
         .then((responses) => {
           const previews = responses
             .map((response) => {
-              console.log(response.error);
+              // console.log(response.error);
               return response.success ? response.data : null;
             })
             .filter(Boolean);

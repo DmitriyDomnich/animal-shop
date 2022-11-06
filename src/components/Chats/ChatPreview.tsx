@@ -10,7 +10,7 @@ type Props = {
 
 const ChatPreview = ({ room, onChatSelect }: Props) => {
   const timeFormatted = useMemo(
-    () => moment(room.createdAt).fromNow(),
+    () => (room.createdAt ? moment(room.createdAt).fromNow() : ''),
     [room.createdAt]
   );
 
@@ -37,7 +37,7 @@ const ChatPreview = ({ room, onChatSelect }: Props) => {
             </span>
           </div>
           <div className='line-clamp-1 text-gray-800 dark:text-gray-200'>
-            {room.lastMessage}
+            {room.lastMessage || ''}
           </div>
         </div>
       </div>

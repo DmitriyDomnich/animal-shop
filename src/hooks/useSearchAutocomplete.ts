@@ -22,7 +22,10 @@ export const useSearchAutocomplete = (
       Fire.getTagsByTerm(term).then((response) => {
         if (response.success) {
           setOptions({
-            data: response.data!,
+            data: response.data!.map(
+              (tagLowerCase) =>
+                `${tagLowerCase[0].toUpperCase()}${tagLowerCase.slice(1)}`
+            ),
             error: null,
             loading: false,
           });

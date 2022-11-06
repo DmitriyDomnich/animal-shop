@@ -1,27 +1,45 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import ChatRoom from 'components/Chats/ChatRoom';
 import ChatPreview from 'components/Chats/ChatPreview';
 import { CircularProgress } from '@mui/material';
 import { useChatPreviews } from 'hooks/useChatPreviews';
 import { ChatPreviewModel } from 'models/ChatPreviewModel';
+import { useSearchParams } from 'react-router-dom';
 
 const ChatsPage = () => {
-  const [currentRoom, setCurrentChat] = useState<ChatPreviewModel | null>(null);
-  const [rooms, roomsLoading] = useChatPreviews();
-  console.log(rooms, 'rooms');
+  const [rooms] = useChatPreviews();
+  const [searchParams] = useSearchParams();
+
+  const [currentRoom, setCurrentRoom] = useState<ChatPreviewModel | null>(null);
 
   const sortedRooms = useMemo(
-    () => (rooms ? rooms.sort((a, b) => b.createdAt - a.createdAt) : null),
+    () =>
+      rooms
+        ? rooms.sort((a, b) =>
+            a.createdAt && b.createdAt
+              ? b.createdAt - a.createdAt
+              : !a.createdAt
+              ? -1
+              : 1
+          )
+        : null,
     [rooms]
   );
+  useEffect(() => {
+    const roomId = searchParams.get('roomId');
+
+    if (roomId && rooms?.length) {
+      setCurrentRoom(rooms.find((room) => room.roomId === roomId)!);
+    }
+  }, [searchParams, rooms]);
 
   return (
     <div className='container mx-auto p-3 flex'>
-      <div className='resize-x max-w-[300px] w-48 select-none rounded-l-xl divide-y min-w-[120px] bg-sky-200 dark:bg-indigo-800 overflow-y-auto'>
-        {!roomsLoading && sortedRooms ? (
+      <div className='resize-x max-w-[300px] select-none rounded-l-xl divide-y min-w-[120px] bg-sky-200 dark:bg-indigo-800 overflow-y-auto'>
+        {sortedRooms ? (
           sortedRooms.map((room) => (
             <ChatPreview
-              onChatSelect={setCurrentChat}
+              onChatSelect={setCurrentRoom}
               key={room.roomId}
               room={room}
             />

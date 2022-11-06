@@ -1,4 +1,11 @@
-import { doc, FirestoreDataConverter, getFirestore } from 'firebase/firestore';
+import {
+  doc,
+  DocumentData,
+  DocumentSnapshot,
+  FirestoreDataConverter,
+  FirestoreError,
+  getFirestore,
+} from 'firebase/firestore';
 import { useMemo } from 'react';
 import { useDocumentDataOnce } from 'react-firebase-hooks/firestore';
 import { app } from 'services/fire';
@@ -9,7 +16,12 @@ export const useAppDocumentDataOnce = <T extends object>(
     converter?: FirestoreDataConverter<T>;
     pathSegments?: string[];
   } | null
-) => {
+): [
+  any | undefined,
+  boolean,
+  FirestoreError | undefined,
+  DocumentSnapshot<DocumentData> | undefined
+] => {
   const documentQuery = useMemo(() => {
     if (!options) {
       return null;

@@ -73,4 +73,6 @@ export const uaLocale: LanguageDictionary = {
   chatRoomNoSelectedText: 'Виберiть чат для подальшого спiлкування',
   writeMessage: 'Напишіть повідомлення...',
   noMessages: 'Напишіть перше повідомлення',
+  approve: 'Підтвердити',
+  enterNameToBuy: "Введiть iм'я на яке до вас будуть звертатися продавцi",
 };

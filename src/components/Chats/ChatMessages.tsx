@@ -24,7 +24,7 @@ const ChatMessages = forwardRef<HTMLDivElement, Props>(
             <div ref={ref}></div>
           </div>
         ) : (
-          <div className='h-full w-full flex justify-center items-center text-3xl'>
+          <div className='h-full w-full text-gray-800 dark:text-gray-200 flex justify-center items-center text-3xl'>
             {dictionary.noMessages}
           </div>
         )}

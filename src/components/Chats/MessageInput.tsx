@@ -44,7 +44,7 @@ const MessageInput = ({ room }: Props) => {
         } as any
       );
       await updateDoc(doc(getFirestore(app), 'rooms', room.roomId), {
-        lastMessage: text,
+        lastMessage: Date.now(),
       });
 
       setText('');

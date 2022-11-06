@@ -54,6 +54,8 @@ export interface LanguageDictionary {
   chatRoomNoSelectedText: string;
   writeMessage: string;
   noMessages: string;
+  approve: string;
+  enterNameToBuy: string;
 }
 export type Places = 'KHR' | 'KY' | 'LV' | 'CHT' | 'CHN' | 'OD' | 'KHE';
 export type AnimalType =

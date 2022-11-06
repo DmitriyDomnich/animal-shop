@@ -73,4 +73,6 @@ export const enLocale: LanguageDictionary = {
   chatRoomNoSelectedText: 'Choose a chat room to start conversating',
   writeMessage: 'Write a message...',
   noMessages: 'Write first message',
+  approve: 'Approve',
+  enterNameToBuy: 'Enter a name which sellers will communicate you with',
 };

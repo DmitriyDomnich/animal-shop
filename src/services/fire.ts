@@ -124,6 +124,7 @@ class Fire {
         'animals',
         animalId
       ).withConverter(advertisementsConverter);
+
       const [messageSnapshot, userSnapshot, advertisementSnapshot] =
         await Promise.all([
           getDocs(lastMessageQuery),
@@ -131,10 +132,14 @@ class Fire {
           getDoc(advertisementUserQuery),
         ]);
       const userData = userSnapshot.data()!;
-      const messageData = messageSnapshot.docs[0].data();
+      const messageData = messageSnapshot.docs[0]?.data() || {
+        createdAt: undefined,
+        text: '',
+      };
       const advertisementUserData = advertisementSnapshot.data()!;
+
       const result: ChatPreviewModel = {
-        userName: advertisementUserData.userName,
+        userName: userData.name!,
         imgUrl: userData.imageUrl,
         createdAt: messageData.createdAt,
         lastMessage: messageData.text,
@@ -155,10 +160,11 @@ class Fire {
 
   async getTagsByTerm(term: string): Promise<APIResponse<string[]>> {
     try {
+      const termLowerCase = term.toLowerCase();
       const tagsQuery = query(
         collection(this.db, 'tags'),
-        where('name', '>=', term),
-        where('name', '<=', term + '\uf8ff')
+        where('name', '>=', termLowerCase),
+        where('name', '<=', termLowerCase + '\uf8ff')
       );
       const snapshot = await getDocs(tagsQuery);
       const tagNames = snapshot.docs.map((doc) => doc.data().name);
@@ -245,9 +251,18 @@ class Fire {
       );
       if (adv.tags.length) {
         for await (const tag of adv.tags) {
-          await addDoc(collection(this.db, 'tags'), {
-            name: tag,
-          });
+          const tagLowerCase = tag.toLowerCase();
+          const existingTagWithSameName = await getDocs(
+            query(
+              collection(this.db, 'tags'),
+              where('name', '==', tagLowerCase)
+            )
+          );
+          if (!existingTagWithSameName.docs[0]?.exists()) {
+            await addDoc(collection(this.db, 'tags'), {
+              name: tagLowerCase,
+            });
+          }
         }
       }
       return {
@@ -373,6 +388,6 @@ class Fire {
     }
   }
 }
-
-export { firebaseApp as app };
+const db = getFirestore(firebaseApp);
+export { firebaseApp as app, db };
 export default new Fire(firebaseApp);

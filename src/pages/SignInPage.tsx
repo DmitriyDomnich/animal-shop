@@ -17,7 +17,7 @@ const SignInPage = () => {
   }, [signInWithGoogle, navigate]);
 
   return (
-    <div>
+    <div className='container mx-auto flex justify-center items-center p-3 h-[calc(100vh-5rem)]'>
       <Button variant='contained' onClick={onSignInWithGoogle}>
         {dictionary.signIn}
       </Button>

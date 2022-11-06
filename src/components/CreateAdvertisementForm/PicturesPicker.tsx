@@ -68,18 +68,16 @@ const PicturesPicker = ({
       ); // todo: move to fire service
       await deleteObject(pictureRef);
       onSetPictures((prev) => {
-        console.log(prev);
         const newPictures = pictures
           .filter((picture) => {
             return !picture || !picture.url.includes(selectedPicture.fileName);
           })
           .concat(null);
+
         return {
           ...prev,
           pictures: {
-            isTouched:
-              newPictures.reduce((acc, curr) => (curr ? acc + 1 : acc), 0) !==
-              0,
+            ...prev.pictures,
             value: newPictures,
           },
         };

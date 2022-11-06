@@ -11,6 +11,7 @@ import { Route, Routes } from 'react-router-dom';
 import { AuthGuard } from 'guards/AuthGuard';
 import { AdvertisementGuard } from 'guards/AdvertisementGuard';
 import AdvertisementPage from 'pages/AdvertisementPage';
+import ModuleLoader from 'components/ModuleLoader/ModuleLoader';
 
 const auth = getAuth(app);
 export const AuthContext = React.createContext(auth);
@@ -77,7 +78,7 @@ function App() {
               <Route
                 element={
                   <AuthGuard>
-                    <Suspense fallback={<div>...loading</div>}>
+                    <Suspense fallback={<ModuleLoader />}>
                       <HomePage />
                     </Suspense>
                   </AuthGuard>
@@ -88,7 +89,7 @@ function App() {
                 element={
                   <AuthGuard>
                     <AdvertisementGuard>
-                      <Suspense fallback={<div>...loading</div>}>
+                      <Suspense fallback={<ModuleLoader />}>
                         <AdvertisementPage />
                       </Suspense>
                     </AdvertisementGuard>
@@ -99,7 +100,7 @@ function App() {
               <Route
                 element={
                   <AuthGuard>
-                    <Suspense fallback={<div>...loading</div>}>
+                    <Suspense fallback={<ModuleLoader />}>
                       <FollowedAdvertisementsPage />
                     </Suspense>
                   </AuthGuard>
@@ -109,7 +110,7 @@ function App() {
               <Route
                 element={
                   <AuthGuard>
-                    <Suspense fallback={<div>...loading</div>}>
+                    <Suspense fallback={<ModuleLoader />}>
                       <CreateAdvertisementPage />
                     </Suspense>
                   </AuthGuard>
@@ -119,7 +120,7 @@ function App() {
               <Route
                 element={
                   <AuthGuard>
-                    <Suspense fallback={<div>...loading</div>}>
+                    <Suspense fallback={<ModuleLoader />}>
                       <MyAdvertisementsPage />
                     </Suspense>
                   </AuthGuard>
@@ -129,7 +130,7 @@ function App() {
               <Route
                 element={
                   <AuthGuard>
-                    <Suspense fallback={<div>...loading</div>}>
+                    <Suspense fallback={<ModuleLoader />}>
                       <ChatsPage />
                     </Suspense>
                   </AuthGuard>
