@@ -6,6 +6,7 @@ import { selectAppLocale } from 'rdx/app/selectors';
 import moment from 'moment';
 import { useNavigate } from 'react-router-dom';
 import AdvTags from 'components/CreateAdvertisementForm/AdvTags';
+import BlurHashedImage from 'components/BlurHashedImage';
 
 type Props = {
   advertisement: AdvertisementModel;
@@ -35,12 +36,19 @@ const AdvertisementCard = ({ advertisement, children }: Props) => {
       >
         <Card>
           <CardMedia>
-            <div
-              style={{
-                backgroundImage: `url(${advertisement.pictures[0]!.url})`,
-              }}
-              className='h-[240px] bg-cover bg-no-repeat bg-center'
-            ></div>
+            {advertisement.blurhash ? (
+              <BlurHashedImage
+                blurhash={advertisement.blurhash}
+                imgUrl={advertisement.pictures[0]!.url}
+              />
+            ) : (
+              <div
+                style={{
+                  backgroundImage: `url(${advertisement.pictures[0]!.url})`,
+                }}
+                className='h-[240px] bg-cover bg-no-repeat bg-center'
+              ></div>
+            )}
           </CardMedia>
           <CardContent>
             <h2 className='font-bold text-xl line-clamp-2 cursor-text min-h-[3em]'>

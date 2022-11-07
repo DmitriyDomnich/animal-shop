@@ -34,6 +34,7 @@ import { useNavigate } from 'react-router-dom';
 import { usePlaces } from 'hooks/usePlaces';
 import { useRef } from 'react';
 import AdvTags from './AdvTags';
+import { encodeImageToBlurhash } from 'utils/blurhashEncode';
 
 type Props = {
   advertisement?: AdvertisementModel;
@@ -205,6 +206,9 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
         {} as any
       );
       advToPost.id = advertisementId;
+      advToPost.blurhash = await encodeImageToBlurhash(
+        formState.pictures.value[0]!.url
+      );
       if (advertisement) {
         dispatch(updateAdvertisement(advToPost)).then((_) => navigate('/'));
       } else {

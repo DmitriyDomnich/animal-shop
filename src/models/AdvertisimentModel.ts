@@ -19,4 +19,5 @@ export interface AdvertisementModel {
   userName: string;
   phoneNumber: string;
   userImage: string;
+  blurhash?: string;
 }
