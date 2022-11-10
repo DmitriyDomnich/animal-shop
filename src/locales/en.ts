@@ -77,4 +77,12 @@ export const enLocale: LanguageDictionary = {
   noMessages: 'Write first message',
   approve: 'Approve',
   enterNameToBuy: 'Enter a name which sellers will communicate you with',
+  errors: {
+    minLength: ' - mininal letters count',
+    minPhotoLength: 'You must attach at least one photo',
+    phoneNumber:
+      'The pattern of the mobile phone does not match. Example: +380672323232',
+    required: 'This field cannot be empty',
+    min: 'Min acceptable price is 0 UAH',
+  },
 };

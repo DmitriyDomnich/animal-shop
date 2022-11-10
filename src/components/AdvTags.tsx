@@ -1,13 +1,12 @@
 import { Chip } from '@mui/material';
 import React, { useCallback } from 'react';
+import { UseFormSetValue } from 'react-hook-form';
 import { AdvertisementFormStateModel } from './CreateAdvertisementForm';
 
 type Props = {
   deletable?: boolean;
   tags: string[];
-  onDeleteTag?: React.Dispatch<
-    React.SetStateAction<AdvertisementFormStateModel>
-  >;
+  onDeleteTag?: UseFormSetValue<AdvertisementFormStateModel>;
   size?: 'medium' | 'small';
 };
 
@@ -19,15 +18,12 @@ const AdvTags = ({
 }: Props) => {
   const handleDelete = useCallback(
     (chipToDelete: string) => {
-      onDeleteTag!((prev) => ({
-        ...prev,
-        tags: {
-          isTouched: true,
-          value: prev.tags.value.filter((tag) => tag !== chipToDelete),
-        },
-      }));
+      onDeleteTag!(
+        'tags',
+        tags.filter((tag) => tag !== chipToDelete)
+      );
     },
-    [onDeleteTag]
+    [onDeleteTag, tags]
   );
 
   return (

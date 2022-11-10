@@ -1,3 +1,4 @@
+import React, { useCallback, useMemo } from 'react';
 import {
   Autocomplete,
   Button,
@@ -9,18 +10,11 @@ import {
   Tooltip,
 } from '@mui/material';
 import { useAnimalTypes } from 'hooks/useAnimalTypes';
-import { Places } from 'locales/models';
+import { FormErrorType, Places } from 'locales/models';
 import { AdvertisementModel, PictureModel } from 'models/AdvertisimentModel';
 import { AnimalTypeModel } from 'models/AnimalTypeModel';
 import { selectAppLocale } from 'rdx/app/selectors';
 import { useAppDispatch, useAppSelector } from 'rdx/hooks';
-import React, {
-  FormEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
 import PicturesPicker from './PicturesPicker';
 import { v4 as createId } from 'uuid';
 import { useAppAuth } from 'hooks/useAppAuth';
@@ -42,41 +36,13 @@ import {
   useForm,
 } from 'react-hook-form';
 import Fire from 'services/fire';
+import { countPhotos } from 'utils/forms';
 
 type Props = {
   advertisement?: AdvertisementModel;
 };
 
 export type AdvertisementFormStateModel = {
-  name: {
-    value: string;
-    isTouched: boolean;
-  };
-  type: string;
-  price: {
-    value: number;
-    isTouched: boolean;
-  };
-  pictures: {
-    value: (PictureModel | null)[];
-    isTouched: boolean;
-  };
-  tags: { value: string[]; isTouched: true };
-  description: string;
-  place: {
-    isTouched: boolean;
-    value: Places | '';
-  };
-  userName: {
-    isTouched: boolean;
-    value: string;
-  };
-  phoneNumber: {
-    isTouched: boolean;
-    value: string;
-  };
-};
-export type AdvertisementFormStateModel2 = {
   name: string;
   type: string;
   price: number;
@@ -95,7 +61,6 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
   const [places] = usePlaces();
   const [, advLoading] = useAppSelector(selectUserAdvertisements);
   const [user] = useAppAuth();
-  const [formError, setFormError] = useState('');
   const navigate = useNavigate();
 
   const advertisementId = useMemo(
@@ -107,157 +72,87 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
   const {
     register,
     handleSubmit,
-    watch,
     control,
+    getValues,
+    setValue,
+    setError,
+    clearErrors,
     formState: { errors },
-  } = useForm<AdvertisementFormStateModel2>({
-    defaultValues: {
-      pictures: [],
-    },
-  });
-
-  const { update: setPictures } = useFieldArray({ control, name: 'pictures' });
-  const form = watch();
-  console.log(form);
-
-  const [formState, setFormState] = useState<AdvertisementFormStateModel>({
-    name: advertisement
-      ? { value: advertisement.name, isTouched: true }
-      : { value: '', isTouched: false },
-    type: advertisement ? advertisement.type : 'Dog',
-    price: advertisement
-      ? { value: advertisement.price, isTouched: true }
+  } = useForm<AdvertisementFormStateModel>({
+    mode: 'onBlur',
+    defaultValues: advertisement
+      ? {
+          name: advertisement.name,
+          pictures: advertisement.pictures,
+          description: advertisement.description,
+          phoneNumber: advertisement.phoneNumber,
+          place: advertisement.place,
+          price: advertisement.price,
+          tags: advertisement.tags,
+          type: advertisement.type,
+          userName: advertisement.userName,
+        }
       : {
-          value: 100,
-          isTouched: false,
-        },
-    pictures: advertisement
-      ? { value: advertisement.pictures, isTouched: true }
-      : {
-          value: Array.from<null | PictureModel>({ length: 8 }).fill(null),
-          isTouched: false,
-        },
-    tags: advertisement
-      ? { value: advertisement.tags || [], isTouched: true }
-      : { value: [], isTouched: true },
-    description: advertisement ? advertisement.description : '',
-    place: advertisement
-      ? { value: advertisement.place, isTouched: true }
-      : { value: '', isTouched: false },
-    userName: advertisement
-      ? { value: advertisement.userName, isTouched: true }
-      : { value: '', isTouched: false },
-    phoneNumber: advertisement
-      ? { value: advertisement.phoneNumber, isTouched: true }
-      : {
-          value: '',
-          isTouched: false,
+          name: '',
+          description: '',
+          phoneNumber: '',
+          pictures: Array.from<null | PictureModel>({ length: 8 }).fill(null),
+          place: '',
+          price: 100,
+          tags: [],
+          type: '',
+          userName: '',
         },
   });
-
-  const handleFormValueChange = useCallback(
-    ({ target }: React.ChangeEvent<HTMLInputElement>) => {
-      const name = target.name as keyof AdvertisementFormStateModel;
-      const value = target.value;
-
-      setFormState((prev) => ({
-        ...prev,
-        [name]:
-          typeof prev[name] === 'object'
-            ? {
-                ...(prev[name] as any),
-                value,
-              }
-            : value,
-      }));
+  const { replace: setPictures } = useFieldArray<AdvertisementFormStateModel>({
+    name: 'pictures',
+    rules: {
+      minLength: 1,
     },
-    [setFormState]
-  );
-  const handleFormValueBlur = useCallback(
-    ({ target }: any) => {
-      const name = target.name as keyof AdvertisementFormStateModel;
+    control,
+  });
+  const startDivRef = useRef<HTMLDivElement>(null);
 
-      setFormState((prev) => ({
-        ...prev,
-        [name]: {
-          ...(prev[name] as any),
-          isTouched: true,
-        },
-      }));
-    },
-    [setFormState]
-  );
-
-  const onPlaceSelected = useCallback(
-    (value: Places | '') => {
-      setFormState((prev) => ({
-        ...prev,
-        place: {
-          isTouched: true,
-          value,
-        },
-      }));
-    },
-    [setFormState]
-  );
   const handleTagAdd = useCallback(() => {
     const newTag = tagsInputRef.current!.value;
-
-    if (newTag && !formState.tags.value.find((currTag) => currTag === newTag)) {
-      setFormState((prev) => ({
-        ...prev,
-        tags: { value: prev.tags.value.concat(newTag), isTouched: true },
-      }));
+    const currTags = getValues('tags');
+    if (newTag && !currTags.find((currTag) => currTag === newTag)) {
+      setValue('tags', currTags.concat(newTag));
       tagsInputRef.current!.value = '';
     }
-  }, [setFormState, tagsInputRef, formState]);
+  }, [getValues, setValue]);
 
-  const onSubmit: SubmitHandler<AdvertisementFormStateModel2> = useCallback(
+  const onSubmit: SubmitHandler<AdvertisementFormStateModel> = useCallback(
     async (data) => {
-      // ev.preventDefault();
-      const potentialNotValidated = Object.values(formState).filter(
-        (val) => typeof val === 'object'
-      );
-
-      if (
-        Object.values(potentialNotValidated).find(
-          (value) => !(value as any).isTouched
-        )
-      ) {
-        setFormError("You didn't pass validation.");
+      if (!countPhotos(data.pictures)) {
+        setError('pictures', {
+          message: 'minPhotoLength',
+        });
+        startDivRef.current?.scrollIntoView();
         return;
       }
-      const advToPost: AdvertisementModel = Object.entries(formState).reduce(
+
+      const advToPost: AdvertisementModel = Object.entries(data).reduce(
         (acc, [key, val]) => {
-          if (typeof val === 'string') {
-            acc[key] = val;
-          } else if (typeof val === 'object') {
-            acc[key] = val.value;
-          }
+          acc[key] = val;
           return acc;
         },
         {} as any
       );
       advToPost.id = advertisementId;
-      advToPost.blurhash = await encodeImageToBlurhash(
-        formState.pictures.value[0]!.url
-      );
+      advToPost.blurhash = await encodeImageToBlurhash(data.pictures[0]!.url);
       if (advertisement) {
         dispatch(updateAdvertisement(advToPost)).then((_) => navigate('/'));
       } else {
-        await Fire.addUserNameIfNotPresent(formState.userName.value);
+        await Fire.addUserNameIfNotPresent(data.userName);
         dispatch(postAdvertisement(advToPost)).then((_) => navigate('/'));
       }
     },
-    [formState, advertisementId, dispatch, advertisement, navigate]
+    [advertisement, advertisementId, dispatch, navigate, setError]
   );
   const handleDelete = useCallback(() => {
     dispatch(deleteAdvertisement(advertisementId)).then((_) => navigate('/'));
   }, [dispatch, advertisementId, navigate]);
-
-  useEffect(() => {
-    setFormError('');
-  }, [formState, setFormError]);
 
   return (
     <form className='container' onSubmit={handleSubmit(onSubmit)}>
@@ -270,18 +165,26 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
         </h5>
         <Tooltip title={dictionary.titleTooltipText} placement='right'>
           <TextField
-            {...register('name', { required: true, minLength: 10 })}
-            required
-            name='name'
-            error={formState.name.value.length < 10 && formState.name.isTouched}
+            {...register('name', {
+              required: {
+                value: true,
+                message: 'required',
+              },
+              minLength: {
+                message: 'minLength',
+                value: 10,
+              },
+            })}
             helperText={
-              formState.name.value.length < 10 && formState.name.isTouched
-                ? 'Wrong input'
+              errors.name
+                ? errors.name.type === 'required'
+                  ? dictionary.errors[errors.name.message as FormErrorType]
+                  : errors.name.type === 'minLength'
+                  ? 10 + dictionary.errors[errors.name.message as FormErrorType]
+                  : ''
                 : ''
             }
-            value={formState.name.value}
-            onChange={handleFormValueChange}
-            onBlur={handleFormValueBlur}
+            error={!!errors.name}
             variant='filled'
             className='w-full md:w-2/3 lg:w-1/2'
           />
@@ -290,20 +193,31 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
           {dictionary.category}*
         </h5>
         {animalTypes && (
-          <div>
-            <Select
-              {...register('type', { required: true })}
+          <div className='flex items-center'>
+            <Controller
               name='type'
-              className='min-w-[120px]'
-              value={formState.type}
-              onChange={(ev) => handleFormValueChange(ev as any)}
-            >
-              {(animalTypes as AnimalTypeModel[]).map((animalType) => (
-                <MenuItem key={animalType.id} value={animalType.name}>
-                  {dictionary.AnimalType[animalType.name]}
-                </MenuItem>
-              ))}
-            </Select>
+              control={control}
+              rules={{
+                required: {
+                  value: true,
+                  message: 'required',
+                },
+              }}
+              render={({ field }) => (
+                <Select {...field} className='min-w-[120px]'>
+                  {(animalTypes as AnimalTypeModel[]).map((animalType) => (
+                    <MenuItem key={animalType.id} value={animalType.name}>
+                      {dictionary.AnimalType[animalType.name]}
+                    </MenuItem>
+                  ))}
+                </Select>
+              )}
+            />
+            {errors.type?.message && (
+              <div className='text-red-600 text-sm ml-2'>
+                {dictionary.errors[errors.type?.message as FormErrorType]}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -317,22 +231,22 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
         <Controller
           control={control}
           name='pictures'
-          render={({ field }) => (
+          render={() => (
             <PicturesPicker
-              setPictures={setPictures}
-              register={register}
+              ref={startDivRef}
+              clearErrors={clearErrors}
+              setError={setError}
+              onSetPictures={setPictures}
               advertisementId={advertisementId}
-              pictures={formState.pictures.value}
-              onSetPictures={setFormState}
+              pictures={getValues('pictures')}
             />
           )}
         />
-
-        {formState.pictures.isTouched &&
-          !formState.pictures.value.reduce(
-            (acc, curr) => (curr ? acc + 1 : acc),
-            0
-          ) && <div className='text-red-600 text-sm ml-2'>Wrong input</div>}
+        {errors.pictures?.message && (
+          <div className='text-red-600 text-sm ml-2'>
+            {dictionary.errors[errors.pictures.message as FormErrorType]}
+          </div>
+        )}
       </div>
       <div className='mt-5 bg-indigo-300 dark:bg-gray-700 p-4 flex flex-wrap'>
         <div className='w-full md:w-1/2 pr-5'>
@@ -347,30 +261,27 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
               <TextField
                 {...register('description', { required: true, minLength: 50 })}
                 name='description'
-                required
-                value={formState.description}
-                onChange={handleFormValueChange}
                 variant='filled'
                 fullWidth
                 multiline
                 rows={10}
-                inputProps={{ maxLength: 1000, minLength: 50 }}
+                inputProps={{ maxLength: 1000 }}
               />
             </Tooltip>
             <h5
               className={`flex justify-between text-md text-gray-500 dark:text-gray-400 mt-5 ${
-                formState.description.length < 50 ? 'flex-row-reverse' : ''
+                getValues('description').length < 50 ? 'flex-row-reverse' : ''
               }`}
             >
               <span>
-                {formState.description.length < 50
+                {getValues('description').length < 50
                   ? `${dictionary.writeMore} ${
-                      50 - formState.description.length
+                      50 - getValues('description').length
                     } ${dictionary.symbols[1]}`
                   : ''}
               </span>
               <span className='text-end'>
-                {formState.description.length}/1000
+                {getValues('description').length}/1000
               </span>
             </h5>
           </div>
@@ -396,12 +307,12 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
                 {dictionary.add}
               </Button>
             </div>
-            {formState.tags.value.length ? (
+            {getValues('tags').length ? (
               <div className='flex flex-wrap space-x-2 space-y-2 bg-[#7ca6db] dark:bg-neutral-800 shadow-lg p-3 pb-5'>
                 <AdvTags
                   deletable
-                  onDeleteTag={setFormState}
-                  tags={formState.tags.value}
+                  onDeleteTag={setValue}
+                  tags={getValues('tags')}
                 />
               </div>
             ) : null}
@@ -421,21 +332,33 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
               getOptionLabel={(option) =>
                 dictionary.places[option.name as Places]
               }
-              onChange={(_, val) => onPlaceSelected(val?.name || '')}
+              onChange={(_, val) => {
+                console.log(val);
+                val && setValue('place', val.name);
+              }}
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  {...register('place', { required: true })}
-                  required
-                  name='place'
-                  error={formState.place.isTouched && !formState.place.value}
+                  {...register('place', {
+                    required: {
+                      message: 'required',
+                      value: true,
+                    },
+                    validate: (val) => {
+                      return (
+                        val &&
+                        !!Object.values(dictionary.places).find(
+                          (place) => place === val
+                        )
+                      );
+                    },
+                  })}
+                  error={!!errors.place}
                   helperText={
-                    formState.place.isTouched && !formState.place.value
-                      ? 'Wrong input'
+                    errors.place
+                      ? dictionary.errors[errors.place.message as FormErrorType]
                       : ''
                   }
-                  value={formState.place.value}
-                  onBlur={handleFormValueBlur}
                   variant='standard'
                   label={dictionary.region}
                 />
@@ -448,23 +371,23 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
             {dictionary.price}*
           </h5>
           <TextField
-            {...register('price', { required: true, min: 0 })}
-            required
-            name='price'
+            {...register('price', {
+              min: {
+                value: 0,
+                message: 'min',
+              },
+            })}
             type='number'
-            error={formState.price.value < 0 && formState.price.isTouched}
+            error={!!errors.price}
             helperText={
-              formState.price.value < 0 && formState.price.isTouched
-                ? 'Wrong input'
+              errors.price
+                ? dictionary.errors[errors.price.message as FormErrorType]
                 : ''
             }
             InputProps={{
               endAdornment: <InputAdornment position='end'>UAH</InputAdornment>,
             }}
             inputProps={{ min: 0 }}
-            value={formState.price.value}
-            onChange={handleFormValueChange}
-            onBlur={handleFormValueBlur}
           />
         </div>
       </div>
@@ -478,23 +401,31 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
               {dictionary.yourName}*
             </h5>
             <TextField
-              {...register('userName', { required: true, minLength: 3 })}
-              name='userName'
-              required
-              error={
-                formState.userName.isTouched &&
-                formState.userName.value.length < 3
-              }
-              inputProps={{ minLength: 3 }}
+              {...register('userName', {
+                required: {
+                  value: true,
+                  message: 'required',
+                },
+                minLength: {
+                  value: 3,
+                  message: 'minLength',
+                },
+              })}
+              error={!!errors.userName}
               helperText={
-                formState.userName.isTouched &&
-                formState.userName.value.length < 3
-                  ? 'Wrong input'
+                errors.userName
+                  ? errors.userName.type === 'minLength'
+                    ? 3 +
+                      dictionary.errors[
+                        errors.userName.message as FormErrorType
+                      ]
+                    : errors.userName.type === 'required'
+                    ? dictionary.errors[
+                        errors.userName.message as FormErrorType
+                      ]
+                    : ''
                   : ''
               }
-              value={formState.userName.value}
-              onBlur={handleFormValueBlur}
-              onChange={handleFormValueChange}
               fullWidth
               variant='standard'
             />
@@ -517,27 +448,31 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
             </h5>
             <TextField
               {...register('phoneNumber', {
-                required: true,
-                pattern:
-                  /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im,
+                required: {
+                  value: true,
+                  message: 'required',
+                },
+                pattern: {
+                  value:
+                    /^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/im,
+                  message: 'phoneNumber',
+                },
               })}
-              name='phoneNumber'
               type='tel'
-              required
-              error={
-                formState.phoneNumber.isTouched &&
-                formState.phoneNumber.value.length < 9
-              }
-              inputProps={{ minLength: 9 }}
+              error={!!errors.phoneNumber}
               helperText={
-                formState.phoneNumber.isTouched &&
-                formState.phoneNumber.value.length < 9
-                  ? 'Wrong input'
+                errors.phoneNumber
+                  ? errors.phoneNumber.type === 'required'
+                    ? dictionary.errors[
+                        errors.phoneNumber.message as FormErrorType
+                      ]
+                    : errors.phoneNumber.type === 'pattern'
+                    ? dictionary.errors[
+                        errors.phoneNumber.message as FormErrorType
+                      ]
+                    : ''
                   : ''
               }
-              value={formState.phoneNumber.value}
-              onChange={handleFormValueChange}
-              onBlur={handleFormValueBlur}
               fullWidth
               variant='standard'
             />
@@ -570,7 +505,6 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
             </Button>
           </div>
         )}
-        {formError && <div className='text-lg text-red-600'>{formError}</div>}
       </div>
     </form>
   );

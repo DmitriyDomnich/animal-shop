@@ -57,7 +57,14 @@ export interface LanguageDictionary {
   noMessages: string;
   approve: string;
   enterNameToBuy: string;
+  errors: Record<FormErrorType, string>;
 }
+export type FormErrorType =
+  | 'required'
+  | 'minLength'
+  | 'minPhotoLength'
+  | 'phoneNumber'
+  | 'min';
 export type Places = 'KHR' | 'KY' | 'LV' | 'CHT' | 'CHN' | 'OD' | 'KHE';
 export type AnimalType =
   | 'Dog'

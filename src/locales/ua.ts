@@ -77,4 +77,12 @@ export const uaLocale: LanguageDictionary = {
   noMessages: 'Напишіть перше повідомлення',
   approve: 'Підтвердити',
   enterNameToBuy: "Введiть iм'я на яке до вас будуть звертатися продавцi",
+  errors: {
+    minLength: ' - мiнiмальна кiлькiсть лiтер',
+    minPhotoLength: 'Ви повиннi прикрiпити як мiнiмум одне фото',
+    phoneNumber:
+      'Паттерн мобiльного телефону не спiвпадає. Приклад: +380672323232',
+    required: 'Це поле не може бути пустим',
+    min: 'Мiнiмальна допустима цiна - 0 грн',
+  },
 };

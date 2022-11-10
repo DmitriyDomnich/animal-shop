@@ -10,154 +10,148 @@ import {
 } from 'firebase/storage';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AdvertisementPicture from './AdvertisementPicture';
-import {
-  AdvertisementFormStateModel,
-  AdvertisementFormStateModel2,
-} from './index';
+import { AdvertisementFormStateModel } from './index';
 import { app } from 'services/fire';
 import { PictureModel } from 'models/AdvertisimentModel';
-import { UseFieldArrayReplace, UseFormRegister } from 'react-hook-form';
+import {
+  UseFieldArrayReplace,
+  UseFormClearErrors,
+  UseFormSetError,
+} from 'react-hook-form';
+import { countPhotos } from 'utils/forms';
 
 type Props = {
   advertisementId: string;
   pictures: Array<PictureModel | null>;
-  onSetPictures: React.Dispatch<
-    React.SetStateAction<AdvertisementFormStateModel>
-  >;
-  register: UseFormRegister<AdvertisementFormStateModel2>;
-  setPictures: UseFieldArrayReplace<AdvertisementFormStateModel2, 'pictures'>;
+  onSetPictures: UseFieldArrayReplace<AdvertisementFormStateModel, 'pictures'>;
+  setError: UseFormSetError<AdvertisementFormStateModel>;
+  clearErrors: UseFormClearErrors<AdvertisementFormStateModel>;
 };
 
-const PicturesPicker = ({
-  pictures,
-  onSetPictures,
-  advertisementId,
-  register,
-  setPictures,
-}: Props) => {
-  const [uploadFile] = useAppUploadFile();
-
-  const handleAddPicture = useCallback(
-    async ({ target }: React.ChangeEvent<HTMLInputElement>) => {
-      const file = target.files![0];
-      if (pictures.find((picture) => picture?.fileName.includes(file.name))) {
-        return;
-      }
-      const uploadResult = await uploadFile(advertisementId, file, {
-        contentType: file.type,
-      });
-      const downloadURL = await getDownloadURL(uploadResult.ref);
-      let isNewPictureUrlSet = false;
-      const newPictures = pictures.map((pictureUrl) => {
-        if (!isNewPictureUrlSet && !pictureUrl) {
-          isNewPictureUrlSet = true;
-          return {
-            url: downloadURL,
-            fileName: file.name,
-          };
+const PicturesPicker = React.forwardRef<HTMLDivElement, Props>(
+  (
+    { setError, pictures, advertisementId, onSetPictures, clearErrors },
+    startDivRef
+  ) => {
+    const [uploadFile] = useAppUploadFile();
+    const handleAddPicture = useCallback(
+      async ({ target }: React.ChangeEvent<HTMLInputElement>) => {
+        const file = target.files![0];
+        if (pictures.find((picture) => picture?.fileName.includes(file.name))) {
+          return;
         }
-        return pictureUrl;
-      });
-      setPictures(newPictures);
-      onSetPictures((prev) => ({
-        ...prev,
-        pictures: {
-          isTouched: true,
-          value: newPictures,
-        },
-      }));
-    },
-    [pictures, uploadFile, advertisementId, setPictures, onSetPictures]
-  );
-  const handleDeletePicture = useCallback(
-    async (selectedPicture: PictureModel) => {
-      const pictureRef = ref(
-        getStorage(app),
-        `adv_${advertisementId}/${selectedPicture.fileName}`
-      ); // todo: move to fire service
-      await deleteObject(pictureRef);
-      onSetPictures((prev) => {
+        const uploadResult = await uploadFile(advertisementId, file, {
+          contentType: file.type,
+        });
+        const downloadURL = await getDownloadURL(uploadResult.ref);
+        let isNewPictureUrlSet = false;
+        const newPictures = pictures.map((pictureUrl) => {
+          if (!isNewPictureUrlSet && !pictureUrl) {
+            isNewPictureUrlSet = true;
+            return {
+              url: downloadURL,
+              fileName: file.name,
+            };
+          }
+          return pictureUrl;
+        });
+        onSetPictures(newPictures);
+        if (countPhotos(newPictures) > 0) {
+          clearErrors('pictures');
+        }
+      },
+      [pictures, uploadFile, advertisementId, onSetPictures, clearErrors]
+    );
+    const handleDeletePicture = useCallback(
+      async (selectedPicture: PictureModel) => {
+        const pictureRef = ref(
+          getStorage(app),
+          `adv_${advertisementId}/${selectedPicture.fileName}`
+        ); // todo: move to fire service
+        await deleteObject(pictureRef);
         const newPictures = pictures
           .filter((picture) => {
             return !picture || !picture.url.includes(selectedPicture.fileName);
           })
           .concat(null);
+        onSetPictures(newPictures);
+        if (!countPhotos(newPictures)) {
+          setError(
+            'pictures',
+            {
+              message: 'minPhotoLength',
+            },
+            {
+              shouldFocus: true,
+            }
+          );
+        }
+      },
+      [advertisementId, onSetPictures, pictures, setError]
+    );
 
-        return {
-          ...prev,
-          pictures: {
-            ...prev.pictures,
-            value: newPictures,
-          },
-        };
-      });
-    },
-    [advertisementId, onSetPictures, pictures]
-  );
+    const resultPictures = useMemo(() => {
+      const picturesCopy = [...pictures];
 
-  const resultPictures = useMemo(() => {
-    const picturesCopy = [...pictures];
-
-    return picturesCopy.map((picture, index) => {
-      if (picture) {
-        return (
-          <AdvertisementPicture
-            key={index}
-            imgSrc={picture.url}
-            className={` bg-cover bg-center flex flex-col-reverse justify-between p-2 ${
-              index === 0 ? ' border-yellow-300 border-4' : ''
-            }`}
-            render={() => (
-              <Button
-                onClick={handleDeletePicture.bind(null, picture)}
-                color='error'
-                variant='contained'
-              >
-                <DeleteIcon />
-              </Button>
-            )}
-          />
-        );
-      }
-      return (
-        <AdvertisementPicture key={index}>
-          <>
-            <input
-              {...register('pictures', {
-                validate: {
-                  length: (photos) => photos.length > 0,
-                },
-              })}
-              type='file'
-              className='hidden'
-              accept='image/png, image/jpeg, image/gif, image/webp'
-              onChange={handleAddPicture}
-              id={`file${index}`}
+      return picturesCopy.map((picture, index) => {
+        if (picture) {
+          return (
+            <AdvertisementPicture
+              key={index}
+              imgSrc={picture.url}
+              className={` bg-cover bg-center flex flex-col-reverse justify-between p-2 ${
+                index === 0 ? ' border-yellow-300 border-4' : ''
+              }`}
+              render={() => (
+                <Button
+                  onClick={handleDeletePicture.bind(null, picture)}
+                  color='error'
+                  variant='contained'
+                >
+                  <DeleteIcon />
+                </Button>
+              )}
             />
-            <label
-              className={
-                'cursor-pointer bg-gray-300 dark:bg-gray-800 rounded-md flex justify-center items-center w-full h-full'
-              }
-              htmlFor={`file${index}`}
-            >
-              <AddAPhotoIcon />
-            </label>
-          </>
-        </AdvertisementPicture>
-      );
-    });
-  }, [pictures, register, handleAddPicture, handleDeletePicture]);
+          );
+        }
+        return (
+          <AdvertisementPicture key={index}>
+            <>
+              <input
+                type='file'
+                className='hidden'
+                accept='image/png, image/jpeg, image/gif, image/webp'
+                onChange={handleAddPicture}
+                id={`file${index}`}
+              />
+              <label
+                className={
+                  'cursor-pointer bg-gray-300 dark:bg-gray-800 rounded-md flex justify-center items-center w-full h-full'
+                }
+                htmlFor={`file${index}`}
+              >
+                <AddAPhotoIcon />
+              </label>
+            </>
+          </AdvertisementPicture>
+        );
+      });
+    }, [handleAddPicture, handleDeletePicture, pictures]);
 
-  return (
-    <Tooltip
-      placement='right'
-      title='Додайте в оголошення справжні фото товару, а не фото з інтернету, щоб підвищити довіру покупців. Підтримуються файли до 5МБ у форматі .jpg .jpeg, .png, .gif.'
-    >
-      <div className='flex flex-wrap space-x-2 space-y-2 max-w-[935px]'>
-        {resultPictures}
-      </div>
-    </Tooltip>
-  );
-};
+    return (
+      <Tooltip
+        placement='right'
+        title='Додайте в оголошення справжні фото товару, а не фото з інтернету, щоб підвищити довіру покупців. Підтримуються файли до 5МБ у форматі .jpg .jpeg, .png, .gif.'
+      >
+        <div
+          ref={startDivRef}
+          className='flex scroll-mt-32 flex-wrap space-x-2 space-y-2 max-w-[935px]'
+        >
+          {resultPictures}
+        </div>
+      </Tooltip>
+    );
+  }
+);
 
 export default PicturesPicker;
