@@ -1,6 +1,7 @@
 import React, {
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -18,6 +19,8 @@ import { signOut } from 'firebase/auth';
 import { AuthContext, ColorModeContext } from 'App';
 import { useNavigate } from 'react-router-dom';
 import ChatBubbleIcon from '@mui/icons-material/ChatBubble';
+import { useMediaQuery } from 'usehooks-ts';
+import MenuIcon from '@mui/icons-material/Menu';
 
 type AvatarConfig = {
   alt: string;
@@ -26,7 +29,7 @@ type AvatarConfig = {
 };
 const styles = {
   locale:
-    'cursor-pointer text-slate-600 dark:text-slate-100 hover:text-slate-900 dark:hover:text-slate-300 ',
+    'cursor-pointer text-slate-600 dark:text-slate-100 hover:text-slate-900 dark:hover:text-slate-300 z-10 ',
 };
 
 const Topbar = () => {
@@ -37,8 +40,11 @@ const Topbar = () => {
   const dispatch = useAppDispatch();
   const userAvatarRef = useRef(null);
   const [userOptionsOpen, setUserOptionsOpen] = useState(false);
-  const colorMode = React.useContext(ColorModeContext);
+  const [showBurger, setShowBurger] = useState(false);
+  const colorMode = useContext(ColorModeContext);
   const navigate = useNavigate();
+  const isMd = useMediaQuery('(min-width: 768px)');
+  const isSm = useMediaQuery('(min-width: 640px)');
 
   const avatar = useMemo(() => {
     if (!user) {
@@ -68,7 +74,12 @@ const Topbar = () => {
     () => navigate('/post'),
     [navigate]
   );
-  const onHomeClick = useCallback(() => navigate('/'), [navigate]);
+  const onHomeClick = useCallback(() => {
+    if (showBurger) {
+      setShowBurger(false);
+    }
+    navigate('/');
+  }, [navigate, showBurger]);
   const onThemeChange = useCallback(
     (ev: React.ChangeEvent<HTMLInputElement>) => {
       colorMode.toggleColorMode();
@@ -104,16 +115,52 @@ const Topbar = () => {
     navigate('/my-advs');
   }, [navigate, setUserOptionsOpen]);
   const goToFollowedAdvertisements = useCallback(() => {
+    if (showBurger) {
+      setShowBurger(false);
+    }
     navigate('/followed');
-  }, [navigate]);
+  }, [navigate, showBurger]);
   const goToChats = useCallback(() => navigate('/chats'), [navigate]);
+
+  const buttonSize = useMemo(() => (isMd ? 'medium' : 'small'), [isMd]);
+
+  const toggleBurger = useCallback(() => {
+    setShowBurger((prev) => !prev);
+  }, [setShowBurger]);
+  useEffect(() => {
+    if (isSm && showBurger) {
+      setShowBurger(false);
+    }
+  }, [setShowBurger, isSm, showBurger]);
 
   return (
     <nav className='container z-10 mx-auto drop-shadow-xl sticky top-0 px-2 py-1 bg-slate-200 dark:bg-slate-700 h-16 flex items-center justify-between'>
+      {showBurger && (
+        <div className='absolute left-0 w-full p-3 divide-y divide-gray-800 dark:divide-gray-200 shadow-lg -bottom-20 bg-slate-200 dark:bg-slate-700 flex flex-col items-center'>
+          <div className='basis-full'>
+            <Button size={buttonSize} onClick={onHomeClick}>
+              <HomeIcon />
+            </Button>
+          </div>
+          <div className='basis-full'>
+            <Button
+              size={buttonSize}
+              onClick={goToFollowedAdvertisements}
+              color='secondary'
+            >
+              <FavoriteIcon />
+            </Button>
+          </div>
+        </div>
+      )}
       <div>
         {user && (
           <div className='flex space-x-2 items-center'>
-            <Button variant='contained' onClick={onAddAdvertisementClick}>
+            <Button
+              size={buttonSize}
+              variant='contained'
+              onClick={onAddAdvertisementClick}
+            >
               {dictionary.addAdvertisement}
             </Button>
             <Tooltip title={dictionary.userOptions}>
@@ -133,25 +180,47 @@ const Topbar = () => {
               <MenuItem onClick={goToYourAdvertisements}>
                 {dictionary.yourAdvertisements}
               </MenuItem>
+              {!isMd ? (
+                <MenuItem onClick={goToChats}>
+                  {dictionary.messages}
+                  <span className='ml-2'>
+                    <ChatBubbleIcon />
+                  </span>
+                </MenuItem>
+              ) : null}
               <MenuItem onClick={handleSignOut}>{dictionary.signOut}</MenuItem>
             </Menu>
-            <Button onClick={goToChats} variant='text' color='secondary'>
-              {dictionary.messages}{' '}
-              <span className='ml-2'>
-                <ChatBubbleIcon />
-              </span>
-            </Button>
+            {isMd ? (
+              <Button onClick={goToChats} variant='text' color='secondary'>
+                {dictionary.messages}
+                <span className='ml-2'>
+                  <ChatBubbleIcon />
+                </span>
+              </Button>
+            ) : null}
           </div>
         )}
       </div>
       <div className='flex items-center'>
         <div className='space-x-2'>
-          <Button onClick={onHomeClick}>
-            <HomeIcon />
-          </Button>
-          <Button onClick={goToFollowedAdvertisements} color='secondary'>
-            <FavoriteIcon />
-          </Button>
+          {isSm ? (
+            <>
+              <Button size={buttonSize} onClick={onHomeClick}>
+                <HomeIcon />
+              </Button>
+              <Button
+                size={buttonSize}
+                onClick={goToFollowedAdvertisements}
+                color='secondary'
+              >
+                <FavoriteIcon />
+              </Button>
+            </>
+          ) : (
+            <Button size={buttonSize} onClick={toggleBurger}>
+              <MenuIcon />
+            </Button>
+          )}
           <span
             className={`${styles.locale} ${
               currentLocaleName === 'ua' ? 'underline' : ''

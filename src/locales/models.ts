@@ -20,6 +20,7 @@ export interface LanguageDictionary {
   createAdvertisement: string;
   updateAdvertisement: string;
   describeInDetail: string;
+  titleTooltipText: string;
   enterName: string;
   category: string;
   photo: string;

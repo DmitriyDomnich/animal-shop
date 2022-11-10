@@ -23,7 +23,7 @@ const BlurHashedImage = ({ blurhash, imgUrl }: Props) => {
       className='h-[240px] bg-cover bg-no-repeat bg-center'
     ></div>
   ) : (
-    <Blurhash hash={blurhash} height={240} />
+    <Blurhash hash={blurhash} height={240} width='100%' />
   );
 };
 export default BlurHashedImage;

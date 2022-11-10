@@ -387,6 +387,19 @@ class Fire {
       };
     }
   }
+
+  async addUserNameIfNotPresent(userName: string) {
+    try {
+      const { currentUser: user } = getAuth(this.app);
+      const userRef = doc(this.db, 'users', user!.uid);
+      const snapshot = await getDoc(
+        doc(this.db, 'users', user!.uid).withConverter(userConverter)
+      );
+      if (!snapshot.data()?.name) {
+        await setDoc(userRef, { name: userName }, { merge: true });
+      }
+    } catch (err: any) {}
+  }
 }
 const db = getFirestore(firebaseApp);
 export { firebaseApp as app, db };

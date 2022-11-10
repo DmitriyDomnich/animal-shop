@@ -10,9 +10,13 @@ import {
 } from 'firebase/storage';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AdvertisementPicture from './AdvertisementPicture';
-import { AdvertisementFormStateModel } from './index';
+import {
+  AdvertisementFormStateModel,
+  AdvertisementFormStateModel2,
+} from './index';
 import { app } from 'services/fire';
 import { PictureModel } from 'models/AdvertisimentModel';
+import { UseFieldArrayReplace, UseFormRegister } from 'react-hook-form';
 
 type Props = {
   advertisementId: string;
@@ -20,12 +24,16 @@ type Props = {
   onSetPictures: React.Dispatch<
     React.SetStateAction<AdvertisementFormStateModel>
   >;
+  register: UseFormRegister<AdvertisementFormStateModel2>;
+  setPictures: UseFieldArrayReplace<AdvertisementFormStateModel2, 'pictures'>;
 };
 
 const PicturesPicker = ({
   pictures,
   onSetPictures,
   advertisementId,
+  register,
+  setPictures,
 }: Props) => {
   const [uploadFile] = useAppUploadFile();
 
@@ -50,6 +58,7 @@ const PicturesPicker = ({
         }
         return pictureUrl;
       });
+      setPictures(newPictures);
       onSetPictures((prev) => ({
         ...prev,
         pictures: {
@@ -58,7 +67,7 @@ const PicturesPicker = ({
         },
       }));
     },
-    [uploadFile, advertisementId, onSetPictures, pictures]
+    [pictures, uploadFile, advertisementId, setPictures, onSetPictures]
   );
   const handleDeletePicture = useCallback(
     async (selectedPicture: PictureModel) => {
@@ -114,6 +123,11 @@ const PicturesPicker = ({
         <AdvertisementPicture key={index}>
           <>
             <input
+              {...register('pictures', {
+                validate: {
+                  length: (photos) => photos.length > 0,
+                },
+              })}
               type='file'
               className='hidden'
               accept='image/png, image/jpeg, image/gif, image/webp'
@@ -132,7 +146,7 @@ const PicturesPicker = ({
         </AdvertisementPicture>
       );
     });
-  }, [pictures, handleAddPicture, handleDeletePicture]);
+  }, [pictures, register, handleAddPicture, handleDeletePicture]);
 
   return (
     <Tooltip

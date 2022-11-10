@@ -5,7 +5,7 @@ import { useAppSelector } from 'rdx/hooks';
 import { selectAppLocale } from 'rdx/app/selectors';
 import moment from 'moment';
 import { useNavigate } from 'react-router-dom';
-import AdvTags from 'components/CreateAdvertisementForm/AdvTags';
+import AdvTags from 'components/AdvTags';
 import BlurHashedImage from 'components/BlurHashedImage';
 
 type Props = {

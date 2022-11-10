@@ -19,7 +19,7 @@ import { PublisherModel } from 'models/UserModel';
 import { useNavigate } from 'react-router-dom';
 import { db, userConverter } from 'services/fire';
 import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
-import AdvTags from 'components/CreateAdvertisementForm/AdvTags';
+import AdvTags from 'components/AdvTags';
 
 const AdvertisementPage = () => {
   const { dictionary } = useAppSelector(selectAppLocale);
@@ -93,20 +93,27 @@ const AdvertisementPage = () => {
       ) : (
         <>
           <div className='p-5 flex flex-wrap bg-gray-200 dark:bg-gray-700 rounded-b-lg shadow-lg'>
-            <div className='basis-full md:basis-2/5'>
-              <Carousel
-                dynamicHeight={true}
-                statusFormatter={(curr, total) =>
-                  `${curr} ${dictionary.of} ${total}`
-                }
-              >
-                {advertisement.pictures.filter(Boolean).map((picture) => (
-                  <div key={picture!.url}>
-                    <img src={picture!.url} alt={picture!.fileName} />
-                  </div>
-                ))}
-              </Carousel>
-            </div>
+            <Carousel
+              className='basis-full md:basis-2/5'
+              dynamicHeight={false}
+              statusFormatter={(curr, total) =>
+                `${curr} ${dictionary.of} ${total}`
+              }
+            >
+              {advertisement.pictures.filter(Boolean).map((picture) => (
+                <div className='h-[550px]' key={picture!.url}>
+                  <div
+                    style={{
+                      backgroundImage: `url(${picture!.url})`,
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'center',
+                      backgroundSize: 'contain',
+                    }}
+                    className='h-full'
+                  ></div>
+                </div>
+              ))}
+            </Carousel>
             <div className='basis-full md:basis-3/5 p-3 flex flex-col space-y-5'>
               <h6 className='text-sm text-gray-800 dark:text-gray-200 italic flex justify-between'>
                 <span>

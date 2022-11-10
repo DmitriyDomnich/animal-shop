@@ -33,8 +33,15 @@ import { selectUserAdvertisements } from 'rdx/advertisements/selectors';
 import { useNavigate } from 'react-router-dom';
 import { usePlaces } from 'hooks/usePlaces';
 import { useRef } from 'react';
-import AdvTags from './AdvTags';
+import AdvTags from '../AdvTags';
 import { encodeImageToBlurhash } from 'utils/blurhashEncode';
+import {
+  Controller,
+  SubmitHandler,
+  useFieldArray,
+  useForm,
+} from 'react-hook-form';
+import Fire from 'services/fire';
 
 type Props = {
   advertisement?: AdvertisementModel;
@@ -69,6 +76,17 @@ export type AdvertisementFormStateModel = {
     value: string;
   };
 };
+export type AdvertisementFormStateModel2 = {
+  name: string;
+  type: string;
+  price: number;
+  pictures: (PictureModel | null)[];
+  tags: string[];
+  description: string;
+  place: Places | '';
+  userName: string;
+  phoneNumber: string;
+};
 
 const CreateAdvertisementForm = ({ advertisement }: Props) => {
   const { dictionary } = useAppSelector(selectAppLocale);
@@ -86,6 +104,21 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
   );
 
   const tagsInputRef = useRef<HTMLInputElement>(null);
+  const {
+    register,
+    handleSubmit,
+    watch,
+    control,
+    formState: { errors },
+  } = useForm<AdvertisementFormStateModel2>({
+    defaultValues: {
+      pictures: [],
+    },
+  });
+
+  const { update: setPictures } = useFieldArray({ control, name: 'pictures' });
+  const form = watch();
+  console.log(form);
 
   const [formState, setFormState] = useState<AdvertisementFormStateModel>({
     name: advertisement
@@ -179,9 +212,9 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
     }
   }, [setFormState, tagsInputRef, formState]);
 
-  const handleSubmit = useCallback(
-    async (ev: FormEvent) => {
-      ev.preventDefault();
+  const onSubmit: SubmitHandler<AdvertisementFormStateModel2> = useCallback(
+    async (data) => {
+      // ev.preventDefault();
       const potentialNotValidated = Object.values(formState).filter(
         (val) => typeof val === 'object'
       );
@@ -212,6 +245,7 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
       if (advertisement) {
         dispatch(updateAdvertisement(advToPost)).then((_) => navigate('/'));
       } else {
+        await Fire.addUserNameIfNotPresent(formState.userName.value);
         dispatch(postAdvertisement(advToPost)).then((_) => navigate('/'));
       }
     },
@@ -226,7 +260,7 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
   }, [formState, setFormError]);
 
   return (
-    <form className='container' onSubmit={handleSubmit}>
+    <form className='container' onSubmit={handleSubmit(onSubmit)}>
       <div className='bg-indigo-300 dark:bg-gray-700 p-4'>
         <h4 className='text-2xl text-sky-900 dark:text-sky-300'>
           {dictionary.describeInDetail}
@@ -234,8 +268,9 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
         <h5 className='text-md text-sky-900 dark:text-sky-300 mt-3 mb-2'>
           {dictionary.enterName}*
         </h5>
-        <Tooltip title='Add' placement='right'>
+        <Tooltip title={dictionary.titleTooltipText} placement='right'>
           <TextField
+            {...register('name', { required: true, minLength: 10 })}
             required
             name='name'
             error={formState.name.value.length < 10 && formState.name.isTouched}
@@ -257,6 +292,7 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
         {animalTypes && (
           <div>
             <Select
+              {...register('type', { required: true })}
               name='type'
               className='min-w-[120px]'
               value={formState.type}
@@ -278,11 +314,20 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
         <h5 className='text-md text-sky-900 dark:text-sky-300 mt-3 mb-2'>
           {dictionary.photoText}
         </h5>
-        <PicturesPicker
-          advertisementId={advertisementId}
-          pictures={formState.pictures.value}
-          onSetPictures={setFormState}
+        <Controller
+          control={control}
+          name='pictures'
+          render={({ field }) => (
+            <PicturesPicker
+              setPictures={setPictures}
+              register={register}
+              advertisementId={advertisementId}
+              pictures={formState.pictures.value}
+              onSetPictures={setFormState}
+            />
+          )}
         />
+
         {formState.pictures.isTouched &&
           !formState.pictures.value.reduce(
             (acc, curr) => (curr ? acc + 1 : acc),
@@ -300,6 +345,7 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
               placement='right'
             >
               <TextField
+                {...register('description', { required: true, minLength: 50 })}
                 name='description'
                 required
                 value={formState.description}
@@ -379,6 +425,7 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
               renderInput={(params) => (
                 <TextField
                   {...params}
+                  {...register('place', { required: true })}
                   required
                   name='place'
                   error={formState.place.isTouched && !formState.place.value}
@@ -401,6 +448,7 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
             {dictionary.price}*
           </h5>
           <TextField
+            {...register('price', { required: true, min: 0 })}
             required
             name='price'
             type='number'
@@ -430,6 +478,7 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
               {dictionary.yourName}*
             </h5>
             <TextField
+              {...register('userName', { required: true, minLength: 3 })}
               name='userName'
               required
               error={
@@ -467,6 +516,11 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
               {dictionary.phoneNumber}*
             </h5>
             <TextField
+              {...register('phoneNumber', {
+                required: true,
+                pattern:
+                  /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im,
+              })}
               name='phoneNumber'
               type='tel'
               required

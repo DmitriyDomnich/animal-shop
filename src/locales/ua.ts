@@ -39,6 +39,8 @@ export const uaLocale: LanguageDictionary = {
   createAdvertisement: 'Створити оголошення',
   updateAdvertisement: 'Редагувати оголошення',
   describeInDetail: 'Опишіть у подробицях',
+  titleTooltipText:
+    'Придумайте короткий заголовок, який приверне увагу та зацiкавить потенцiйних покупцiв',
   enterName: 'Вкажіть назву',
   category: 'Категорiя',
   photo: 'Фото',

@@ -1,6 +1,6 @@
 import { Chip } from '@mui/material';
 import React, { useCallback } from 'react';
-import { AdvertisementFormStateModel } from '.';
+import { AdvertisementFormStateModel } from './CreateAdvertisementForm';
 
 type Props = {
   deletable?: boolean;

@@ -39,6 +39,8 @@ export const enLocale: LanguageDictionary = {
   createAdvertisement: 'Create Advertisement',
   updateAdvertisement: 'Update Advertisement',
   describeInDetail: 'Describe in detail',
+  titleTooltipText:
+    'Come up with a short headline that will attract attention and interest potential buyers',
   enterName: 'Enter a name',
   category: 'Category',
   photo: 'Photo',

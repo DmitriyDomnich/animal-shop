@@ -35,7 +35,7 @@ const ChatsPage = () => {
 
   return (
     <div className='container mx-auto p-3 flex'>
-      <div className='resize-x max-w-[300px] select-none rounded-l-xl divide-y min-w-[120px] bg-sky-200 dark:bg-indigo-800 overflow-y-auto'>
+      <div className='w-14 md:w-64 select-none rounded-l-xl divide-y bg-sky-200 dark:bg-indigo-800 overflow-y-auto overflow-x-hidden'>
         {sortedRooms ? (
           sortedRooms.map((room) => (
             <ChatPreview
