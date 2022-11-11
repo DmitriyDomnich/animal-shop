@@ -12,6 +12,7 @@ import { AuthGuard } from 'guards/AuthGuard';
 import { AdvertisementGuard } from 'guards/AdvertisementGuard';
 import AdvertisementPage from 'pages/AdvertisementPage';
 import ModuleLoader from 'components/ModuleLoader/ModuleLoader';
+import Page404 from 'pages/Page404';
 
 const auth = getAuth(app);
 export const AuthContext = React.createContext(auth);
@@ -63,7 +64,7 @@ function App() {
   if (loading) {
     return (
       <div className={defaultStyles + 'flex justify-center items-center '}>
-        <LinearProgress className='w-64' />
+        <LinearProgress className='w-full' />
       </div>
     );
   }
@@ -138,6 +139,7 @@ function App() {
                 path='/chats'
               />
               <Route element={<SignInPage />} path='sign-in' />
+              <Route element={<Page404 />} path='*' />
             </Routes>
           </div>
         </AuthContext.Provider>

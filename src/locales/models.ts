@@ -58,6 +58,7 @@ export interface LanguageDictionary {
   approve: string;
   enterNameToBuy: string;
   errors: Record<FormErrorType, string>;
+  pageNotFound: string;
 }
 export type FormErrorType =
   | 'required'

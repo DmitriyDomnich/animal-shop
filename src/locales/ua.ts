@@ -85,4 +85,5 @@ export const uaLocale: LanguageDictionary = {
     required: 'Це поле не може бути пустим',
     min: 'Мiнiмальна допустима цiна - 0 грн',
   },
+  pageNotFound: 'Сторiнка не знайдена',
 };

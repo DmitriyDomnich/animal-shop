@@ -85,4 +85,5 @@ export const enLocale: LanguageDictionary = {
     required: 'This field cannot be empty',
     min: 'Min acceptable price is 0 UAH',
   },
+  pageNotFound: 'Page is not found',
 };

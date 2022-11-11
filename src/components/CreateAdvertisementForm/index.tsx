@@ -76,6 +76,7 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
     getValues,
     setValue,
     setError,
+    watch,
     clearErrors,
     formState: { errors },
   } = useForm<AdvertisementFormStateModel>({
@@ -270,18 +271,18 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
             </Tooltip>
             <h5
               className={`flex justify-between text-md text-gray-500 dark:text-gray-400 mt-5 ${
-                getValues('description').length < 50 ? 'flex-row-reverse' : ''
+                watch('description').length < 50 ? 'flex-row-reverse' : ''
               }`}
             >
               <span>
-                {getValues('description').length < 50
+                {watch('description').length < 50
                   ? `${dictionary.writeMore} ${
                       50 - getValues('description').length
                     } ${dictionary.symbols[1]}`
                   : ''}
               </span>
               <span className='text-end'>
-                {getValues('description').length}/1000
+                {watch('description').length}/1000
               </span>
             </h5>
           </div>
@@ -332,10 +333,7 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
               getOptionLabel={(option) =>
                 dictionary.places[option.name as Places]
               }
-              onChange={(_, val) => {
-                console.log(val);
-                val && setValue('place', val.name);
-              }}
+              onChange={(_, val) => val && setValue('place', val.name)}
               renderInput={(params) => (
                 <TextField
                   {...params}
