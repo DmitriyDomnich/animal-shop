@@ -45,7 +45,9 @@ const ChatsPage = () => {
             />
           ))
         ) : (
-          <CircularProgress />
+          <div className='h-full w-full flex justify-center items-center p-1'>
+            <CircularProgress />
+          </div>
         )}
       </div>
       <ChatRoom room={currentRoom} />

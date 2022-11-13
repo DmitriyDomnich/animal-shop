@@ -28,11 +28,17 @@ const MyAdvertisementsPage = (props: Props) => {
   );
 
   return (
-    <div className='container mx-auto bg-indigo-300 dark:bg-gray-600 p-3 md:p-5'>
+    <div className='container mx-auto my-5 p-3 md:p-5'>
       <h2 className='text-5xl text-center text-sky-900 dark:text-sky-300'>
         {dictionary.yourAdvertisements}
       </h2>
-      <div className={`my-4 ${advertisements?.length ? 'flex flex-wrap' : ''}`}>
+      <div
+        className={`my-4 ${
+          advertisements?.length
+            ? 'flex flex-wrap bg-indigo-300 dark:bg-gray-600 justify-center md:justify-start p-3'
+            : ''
+        }`}
+      >
         {!loading && advertisements?.length ? (
           advertisements.map((adv) => (
             <AdvertisementCard key={adv.id} advertisement={adv}>

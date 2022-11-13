@@ -59,6 +59,8 @@ export interface LanguageDictionary {
   enterNameToBuy: string;
   errors: Record<FormErrorType, string>;
   pageNotFound: string;
+  noAdvertisements: string;
+  resourceLoadingError: string;
 }
 export type FormErrorType =
   | 'required'

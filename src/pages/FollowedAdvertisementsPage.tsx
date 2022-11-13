@@ -22,13 +22,13 @@ const FollowedAdvertisementsPage = () => {
   );
 
   return (
-    <div className='container mx-auto p-5 my-5 text-gray-800 dark:text-gray-200'>
+    <div className='container mx-auto my-5 p-3 text-gray-800 dark:text-gray-200'>
       <h2 className='text-4xl text-center my-4'>
         {dictionary.followedAdvertisements}
       </h2>
       {!followedLoading ? (
         followedAdvs?.length ? (
-          <div className='p-5 flex flex-wrap bg-indigo-300 dark:bg-gray-600 space-x-3 space-y-3'>
+          <div className='w-full p-5 flex flex-wrap bg-indigo-300 dark:bg-gray-600 space-x-3 space-y-3 justify-center md:justify-start'>
             {followedAdvs.map((adv) => (
               <AdvertisementCard key={adv.id} advertisement={adv}>
                 <Button

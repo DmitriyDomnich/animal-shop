@@ -86,4 +86,7 @@ export const enLocale: LanguageDictionary = {
     min: 'Min acceptable price is 0 UAH',
   },
   pageNotFound: 'Page is not found',
+  noAdvertisements: 'Advertisements with the inputted filters are not found',
+  resourceLoadingError:
+    'Error while loading the resource, please reload the page',
 };

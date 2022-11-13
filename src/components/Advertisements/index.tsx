@@ -93,7 +93,7 @@ const Advertisements = () => {
           error: null,
           loading: false,
         }));
-        setLastVisibleDoc(() => val.lastSnapshotRef);
+        setLastVisibleDoc(() => val.lastSnapshotRef || lastVisibleDoc);
       } else {
         setAdvertisements((prev) => ({
           ...prev,
@@ -105,7 +105,8 @@ const Advertisements = () => {
     });
   }, [lastVisibleDoc, searchParams]);
 
-  const [followedAdvs, followedLoading] = useUserFollowedAdvertisements();
+  const [followedAdvs, followedLoading, followedError] =
+    useUserFollowedAdvertisements();
 
   const handleFollowAdvertisement = useCallback(
     (adv: AdvertisementModel) => {
@@ -126,56 +127,74 @@ const Advertisements = () => {
   );
 
   return (
-    <div className='bg-indigo-300 dark:bg-gray-600 p-3 md:p-5 my-5'>
-      {!followedLoading && advertisements?.data?.length ? (
-        <>
-          <h2 className='text-5xl text-center text-sky-900 dark:text-sky-300'>
-            {dictionary.advertisementsHomePageText}
-          </h2>
-          <div className='my-4 flex flex-wrap'>
-            {(advertisements.data as AdvertisementModel[]).map((adv) => (
-              <AdvertisementCard key={adv.id} advertisement={adv}>
-                {followedAdvs!.find(
-                  (followedAdv) => followedAdv.id === adv.id
-                ) ? (
-                  <Button
-                    onClick={(ev) => {
-                      ev.stopPropagation();
-                      handleUnfollowAdvertisement(adv.id);
-                    }}
-                    size='small'
-                  >
-                    <FavoriteIcon />
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={(ev) => {
-                      ev.stopPropagation();
-                      handleFollowAdvertisement(adv);
-                    }}
-                    size='small'
-                  >
-                    <FavoriteBorderIcon />
-                  </Button>
-                )}
-              </AdvertisementCard>
-            ))}
+    <div className='bg-indigo-300 dark:bg-gray-600 p-3 m-3 md:p-5 my-5'>
+      {Boolean(followedError || !advertisements.error) ? (
+        !followedLoading ? (
+          <>
+            <h2 className='text-5xl text-center text-sky-900 dark:text-sky-300'>
+              {dictionary.advertisementsHomePageText}
+            </h2>
+            {advertisements.data?.length ? (
+              <div className='my-4 flex flex-wrap justify-center md:justify-start'>
+                {(advertisements.data as AdvertisementModel[]).map((adv) => (
+                  <AdvertisementCard key={adv.id} advertisement={adv}>
+                    {followedAdvs!.find(
+                      (followedAdv) => followedAdv.id === adv.id
+                    ) ? (
+                      <Button
+                        onClick={(ev) => {
+                          ev.stopPropagation();
+                          handleUnfollowAdvertisement(adv.id);
+                        }}
+                        size='small'
+                      >
+                        <FavoriteIcon />
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={(ev) => {
+                          ev.stopPropagation();
+                          handleFollowAdvertisement(adv);
+                        }}
+                        size='small'
+                      >
+                        <FavoriteBorderIcon />
+                      </Button>
+                    )}
+                  </AdvertisementCard>
+                ))}
+              </div>
+            ) : (
+              <div className='text-2xl w-full text-center mt-4 text-gray-800 dark:text-gray-200'>
+                {dictionary.noAdvertisements}
+              </div>
+            )}
+            <div className='my-4 flex flex-col items-center space-y-3'>
+              {advertisements.loading && advertisements.data.length ? (
+                <CircularProgress color='error' />
+              ) : null}
+              {advertisements.data.length ? (
+                <Button
+                  variant='contained'
+                  onClick={handleLoadMore}
+                  color='primary'
+                >
+                  <span className='mr-1'>{dictionary.loadMore}</span>{' '}
+                  <DownloadingIcon />
+                </Button>
+              ) : null}
+            </div>
+          </>
+        ) : (
+          <div className='w-full text-center'>
+            <CircularProgress size={40} />
           </div>
-          <div className='my-4 flex flex-col items-center space-y-3'>
-            {advertisements.loading && advertisements.data.length ? (
-              <CircularProgress color='error' />
-            ) : null}
-            <Button
-              variant='contained'
-              onClick={handleLoadMore}
-              color='primary'
-            >
-              <span className='mr-1'>{dictionary.loadMore}</span>{' '}
-              <DownloadingIcon />
-            </Button>
-          </div>
-        </>
-      ) : null}
+        )
+      ) : (
+        <div className='w-full text-center text-2xl text-gray-800 dark:text-gray-200'>
+          {dictionary.resourceLoadingError}
+        </div>
+      )}
     </div>
   );
 };

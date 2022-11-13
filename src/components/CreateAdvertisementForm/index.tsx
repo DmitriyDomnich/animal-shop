@@ -94,15 +94,16 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
           userName: advertisement.userName,
         }
       : {
-          name: '',
-          description: '',
-          phoneNumber: '',
+          name: 'ПОДКАТЫ К НАСТЕ ИВЛЕЕВОЙ 💪😎💰',
+          description:
+            'ПОДКАТЫ К НАСТЕ ИВЛЕЕВОЙ 💪😎💰ПОДКАТЫ К НАСТЕ ИВЛЕЕВОЙ 💪😎💰ПОДКАТЫ К НАСТЕ ИВЛЕЕВОЙ 💪😎💰',
+          phoneNumber: '+38096969696',
           pictures: Array.from<null | PictureModel>({ length: 8 }).fill(null),
           place: '',
           price: 100,
           tags: [],
           type: '',
-          userName: '',
+          userName: 'ПОДКАТЫ К НАСТЕ ИВЛЕЕВОЙ 💪😎💰',
         },
   });
   const { replace: setPictures } = useFieldArray<AdvertisementFormStateModel>({
@@ -132,10 +133,17 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
         startDivRef.current?.scrollIntoView();
         return;
       }
+      console.log(data, 'submitting');
 
       const advToPost: AdvertisementModel = Object.entries(data).reduce(
         (acc, [key, val]) => {
-          acc[key] = val;
+          if (key === 'place') {
+            acc[key] = Object.keys(dictionary.places).find(
+              (key) => dictionary.places[key as Places] === val
+            );
+          } else {
+            acc[key] = val;
+          }
           return acc;
         },
         {} as any
@@ -149,7 +157,14 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
         dispatch(postAdvertisement(advToPost)).then((_) => navigate('/'));
       }
     },
-    [advertisement, advertisementId, dispatch, navigate, setError]
+    [
+      advertisement,
+      advertisementId,
+      dictionary.places,
+      dispatch,
+      navigate,
+      setError,
+    ]
   );
   const handleDelete = useCallback(() => {
     dispatch(deleteAdvertisement(advertisementId)).then((_) => navigate('/'));
@@ -333,7 +348,11 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
               getOptionLabel={(option) =>
                 dictionary.places[option.name as Places]
               }
-              onChange={(_, val) => val && setValue('place', val.name)}
+              onChange={(_, val) => {
+                console.log('setting', val?.name);
+
+                val && setValue('place', val.name);
+              }}
               renderInput={(params) => (
                 <TextField
                   {...params}
@@ -343,6 +362,8 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
                       value: true,
                     },
                     validate: (val) => {
+                      console.log('validating', val);
+
                       return (
                         val &&
                         !!Object.values(dictionary.places).find(

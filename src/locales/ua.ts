@@ -86,4 +86,7 @@ export const uaLocale: LanguageDictionary = {
     min: 'Мiнiмальна допустима цiна - 0 грн',
   },
   pageNotFound: 'Сторiнка не знайдена',
+  noAdvertisements: 'Оголошення даних фiльтрiв не знайденi',
+  resourceLoadingError:
+    'Помилка при завантаженнi ресурсу, будь ласка перезавантажте сторiнку',
 };
