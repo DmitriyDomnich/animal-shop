@@ -92,8 +92,9 @@ const AdvertisementPage = () => {
         <CircularProgress />
       ) : (
         <>
-          <div className='p-5 flex flex-wrap bg-gray-200 dark:bg-gray-700 rounded-b-lg shadow-lg'>
+          <div className='p-5 flex flex-wrap  bg-gray-200 dark:bg-gray-700 rounded-b-lg shadow-lg'>
             <Carousel
+              showThumbs={true}
               className='basis-full md:basis-2/5'
               dynamicHeight={false}
               statusFormatter={(curr, total) =>
@@ -102,15 +103,11 @@ const AdvertisementPage = () => {
             >
               {advertisement.pictures.filter(Boolean).map((picture) => (
                 <div className='h-[550px]' key={picture!.url}>
-                  <div
-                    style={{
-                      backgroundImage: `url(${picture!.url})`,
-                      backgroundRepeat: 'no-repeat',
-                      backgroundPosition: 'center',
-                      backgroundSize: 'contain',
-                    }}
-                    className='h-full'
-                  ></div>
+                  <img
+                    alt=''
+                    src={picture!.url}
+                    className='h-full object-contain'
+                  />
                 </div>
               ))}
             </Carousel>

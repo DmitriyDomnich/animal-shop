@@ -69,7 +69,7 @@ const AdvertisementCard = ({ advertisement, children }: Props) => {
             </h4>
             <h2 className='font-bold text-lg flex justify-between'>
               <span>
-                {advertisement.price
+                {+advertisement.price
                   ? `${advertisement.price} ${dictionary.hryvnia}`
                   : dictionary.free}
               </span>

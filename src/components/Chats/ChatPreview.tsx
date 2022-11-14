@@ -1,7 +1,15 @@
 import { Avatar } from '@mui/material';
 import { ChatPreviewModel } from 'models/ChatPreviewModel';
 import moment from 'moment';
-import React, { Dispatch, SetStateAction, useCallback, useMemo } from 'react';
+import { selectAppLocale } from 'rdx/app/selectors';
+import { useAppSelector } from 'rdx/hooks';
+import React, {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 
 type Props = {
   room: ChatPreviewModel;
@@ -9,10 +17,28 @@ type Props = {
 };
 
 const ChatPreview = ({ room, onChatSelect }: Props) => {
-  const timeFormatted = useMemo(
-    () => (room.createdAt ? moment(room.createdAt).fromNow() : ''),
-    [room.createdAt]
+  const { dictionary } = useAppSelector(selectAppLocale);
+  const [lastMessageTime, setLastMessageTime] = useState(
+    room.createdAt ? moment(room.createdAt).fromNow() : ''
   );
+
+  useEffect(() => {
+    const id = setInterval(
+      () =>
+        setLastMessageTime(
+          room.createdAt ? moment(room.createdAt).fromNow() : ''
+        ),
+      60000
+    );
+
+    return () => {
+      clearInterval(id);
+    };
+  }, [room.createdAt]);
+
+  useEffect(() => {
+    setLastMessageTime(room.createdAt ? moment(room.createdAt).fromNow() : '');
+  }, [dictionary, room]);
 
   const handleSelect = useCallback(() => {
     onChatSelect(room);
@@ -33,7 +59,7 @@ const ChatPreview = ({ room, onChatSelect }: Props) => {
               {room.userName}
             </span>
             <span className='line-clamp-1 text-gray-900 dark:text-gray-300'>
-              {timeFormatted}
+              {lastMessageTime}
             </span>
           </div>
           <div className='line-clamp-1 text-gray-800 dark:text-gray-200'>

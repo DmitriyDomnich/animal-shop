@@ -94,16 +94,15 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
           userName: advertisement.userName,
         }
       : {
-          name: 'ПОДКАТЫ К НАСТЕ ИВЛЕЕВОЙ 💪😎💰',
-          description:
-            'ПОДКАТЫ К НАСТЕ ИВЛЕЕВОЙ 💪😎💰ПОДКАТЫ К НАСТЕ ИВЛЕЕВОЙ 💪😎💰ПОДКАТЫ К НАСТЕ ИВЛЕЕВОЙ 💪😎💰',
-          phoneNumber: '+38096969696',
+          name: '',
+          description: '',
+          phoneNumber: '',
           pictures: Array.from<null | PictureModel>({ length: 8 }).fill(null),
           place: '',
           price: 100,
           tags: [],
           type: '',
-          userName: 'ПОДКАТЫ К НАСТЕ ИВЛЕЕВОЙ 💪😎💰',
+          userName: '',
         },
   });
   const { replace: setPictures } = useFieldArray<AdvertisementFormStateModel>({
@@ -133,7 +132,6 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
         startDivRef.current?.scrollIntoView();
         return;
       }
-      console.log(data, 'submitting');
 
       const advToPost: AdvertisementModel = Object.entries(data).reduce(
         (acc, [key, val]) => {
@@ -323,12 +321,12 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
                 {dictionary.add}
               </Button>
             </div>
-            {getValues('tags').length ? (
+            {watch('tags').length ? (
               <div className='flex flex-wrap space-x-2 space-y-2 bg-[#7ca6db] dark:bg-neutral-800 shadow-lg p-3 pb-5'>
                 <AdvTags
                   deletable
                   onDeleteTag={setValue}
-                  tags={getValues('tags')}
+                  tags={watch('tags')}
                 />
               </div>
             ) : null}
