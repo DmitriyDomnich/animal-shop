@@ -203,7 +203,11 @@ const Topbar = () => {
       </div>
       <div className='flex items-center'>
         <div className='space-x-2'>
-          {isSm ? (
+          {!user ? (
+            <Button size={buttonSize} onClick={onHomeClick}>
+              <HomeIcon />
+            </Button>
+          ) : isSm ? (
             <>
               <Button size={buttonSize} onClick={onHomeClick}>
                 <HomeIcon />
