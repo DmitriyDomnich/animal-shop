@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import {
   Autocomplete,
   Button,
@@ -35,8 +35,10 @@ import {
   useFieldArray,
   useForm,
 } from 'react-hook-form';
-import Fire from 'services/fire';
+import Fire, { userConverter } from 'services/fire';
 import { countPhotos } from 'utils/forms';
+import { useAppDocumentDataOnce } from 'hooks/useAppDocumentDataOnce';
+import { PublisherModel } from 'models/UserModel';
 
 type Props = {
   advertisement?: AdvertisementModel;
@@ -62,7 +64,15 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
   const [, advLoading] = useAppSelector(selectUserAdvertisements);
   const [user] = useAppAuth();
   const navigate = useNavigate();
-
+  const [advUser] = useAppDocumentDataOnce<PublisherModel>(
+    !advertisement
+      ? {
+          path: 'users',
+          pathSegments: [user!.uid],
+          converter: userConverter,
+        }
+      : null
+  );
   const advertisementId = useMemo(
     () => advertisement?.id || createId(),
     [advertisement]
@@ -94,7 +104,7 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
           userName: advertisement.userName,
         }
       : {
-          name: '',
+          name: advUser?.name || '',
           description: '',
           phoneNumber: '',
           pictures: Array.from<null | PictureModel>({ length: 8 }).fill(null),
@@ -105,6 +115,13 @@ const CreateAdvertisementForm = ({ advertisement }: Props) => {
           userName: '',
         },
   });
+
+  useEffect(() => {
+    if (!advertisement) {
+      setValue('userName', advUser?.name || '');
+    }
+  }, [advUser, setValue, advertisement]);
+
   const { replace: setPictures } = useFieldArray<AdvertisementFormStateModel>({
     name: 'pictures',
     rules: {

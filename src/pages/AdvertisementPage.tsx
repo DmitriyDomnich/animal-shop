@@ -18,7 +18,7 @@ import { useAppDocumentDataOnce } from 'hooks/useAppDocumentDataOnce';
 import { PublisherModel } from 'models/UserModel';
 import { useNavigate } from 'react-router-dom';
 import { db, userConverter } from 'services/fire';
-import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, setDoc } from 'firebase/firestore';
 import AdvTags from 'components/AdvTags';
 
 const AdvertisementPage = () => {
@@ -50,9 +50,16 @@ const AdvertisementPage = () => {
     async (ev: React.FormEvent<HTMLFormElement>) => {
       ev.preventDefault();
 
-      await updateDoc(doc(db, 'users', currUser!.uid), {
-        name: userName,
-      });
+      await setDoc(
+        doc(db, 'users', currUser!.uid),
+        {
+          name: userName,
+          email: currUser!.email,
+          uid: currUser!.uid,
+          imageUrl: currUser!.photoURL || '',
+        },
+        { merge: true }
+      );
 
       setShowNameForm(false);
     },

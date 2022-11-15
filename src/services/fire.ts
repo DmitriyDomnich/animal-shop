@@ -396,7 +396,16 @@ class Fire {
         doc(this.db, 'users', user!.uid).withConverter(userConverter)
       );
       if (!snapshot.data()?.name) {
-        await setDoc(userRef, { name: userName }, { merge: true });
+        await setDoc(
+          userRef,
+          {
+            name: userName,
+            uid: user!.uid,
+            email: user!.email,
+            imageUrl: user!.photoURL || '',
+          },
+          { merge: true }
+        );
       }
     } catch (err: any) {}
   }

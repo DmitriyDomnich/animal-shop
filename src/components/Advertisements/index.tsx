@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Button, CircularProgress } from '@mui/material';
 import {
   limit,
@@ -41,6 +41,7 @@ const Advertisements = () => {
     data: [],
     error: null,
   });
+  const startRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
     setAdvertisements((prev) => ({ ...prev, loading: true, error: null }));
@@ -55,15 +56,14 @@ const Advertisements = () => {
       limit(2),
     ];
     Fire.getAdvertisements(constraints).then((val) => {
-      console.log(val);
-
       if (val) {
-        setAdvertisements({
+        setAdvertisements((prev) => ({
           data: val.data,
           error: null,
           loading: false,
-        });
+        }));
         setLastVisibleDoc(() => val.lastSnapshotRef);
+        startRef.current?.scrollIntoView({ behavior: 'smooth' });
       } else {
         setAdvertisements((prev) => ({
           ...prev,
@@ -125,13 +125,17 @@ const Advertisements = () => {
     },
     [dispatch, user]
   );
+  console.log(followedError, advertisements.error);
 
   return (
     <div className='bg-indigo-300 dark:bg-gray-600 p-3 m-3 md:p-5 my-5'>
-      {Boolean(followedError || !advertisements.error) ? (
+      {Boolean(!followedError && !advertisements.error) ? (
         !followedLoading ? (
           <>
-            <h2 className='text-5xl text-center text-sky-900 dark:text-sky-300'>
+            <h2
+              ref={startRef}
+              className='text-5xl text-center text-sky-900 dark:text-sky-300'
+            >
               {dictionary.advertisementsHomePageText}
             </h2>
             {advertisements.data?.length ? (
